@@ -28,6 +28,8 @@ jobs:
     if: github.event_name == 'pull_request_target'
     runs-on: ubuntu-latest
     permissions:
+      # Job permissions replace the workflow's, so reading .github/release-drafter.yml needs this too.
+      contents: read
       pull-requests: write
     steps:
       - uses: release-drafter/release-drafter/autolabeler@v7
