@@ -1,10 +1,9 @@
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import Fastify, { type FastifyError } from "fastify";
 import fastifyStatic from "@fastify/static";
-import type { ResourceQuery, ResourceRow, SummaryQuery } from "../shared/types.js";
+import type { SnapshotQuery } from "../shared/types.js";
 import { AzureError } from "./azure/http.js";
 import { Inventory } from "./azure/inventory.js";
 import type { Cache } from "./cache.js";
@@ -22,6 +21,19 @@ function defaultWebRoot() {
   const here = dirname(fileURLToPath(import.meta.url));
   return join(here, "..", "web");
 }
+
+const GUID = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+
+const SNAPSHOT_BODY = {
+  type: "object",
+  required: ["tenantId", "subscriptionIds"],
+  additionalProperties: false,
+  properties: {
+    tenantId: { type: "string", pattern: GUID },
+    subscriptionIds: { type: "array", minItems: 1, items: { type: "string", pattern: GUID } },
+    freshAfter: { type: "number" },
+  },
+} as const;
 
 const freshAfter = (v: unknown) => (typeof v === "string" && /^\d+$/.test(v) ? Number(v) : undefined);
 
@@ -61,28 +73,13 @@ export async function buildApp({ cache, token, webRoot = defaultWebRoot() }: App
     (req) => inventory.resourceGroups(req.params.tid, req.params.sid, freshAfter(req.query.freshAfter)),
   );
 
-  app.post<{ Body: ResourceQuery }>("/api/resources/query", (req) => inventory.resources(req.body));
-
-  app.post<{ Body: SummaryQuery }>("/api/summary", (req) => inventory.summary(req.body));
+  app.post<{ Body: SnapshotQuery }>("/api/snapshot", { schema: { body: SNAPSHOT_BODY } }, (req) =>
+    inventory.snapshot(req.body),
+  );
 
   app.get<{ Querystring: { tenantId: string; id: string; freshAfter?: string } }>("/api/resources/details", (req) =>
     inventory.details(req.query.tenantId, req.query.id, freshAfter(req.query.freshAfter)),
   );
-
-  // GET with the query encoded in `q` so the browser can download natively via a link.
-  app.get<{ Querystring: { q: string; format?: string } }>("/api/export", async (req, reply) => {
-    const query = JSON.parse(Buffer.from(req.query.q, "base64url").toString("utf8")) as ResourceQuery;
-    const format = req.query.format === "json" ? "json" : "csv";
-    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
-    reply
-      .header("content-type", format === "json" ? "application/json" : "text/csv; charset=utf-8")
-      .header("content-disposition", `attachment; filename="azure-inventory-${stamp}.${format}"`);
-    return reply.send(
-      Readable.from(
-        format === "json" ? exportJson(inventory.exportRows(query)) : exportCsv(inventory.exportRows(query)),
-      ),
-    );
-  });
 
   app.post("/api/cache/clear", async () => {
     await cache.clear();
@@ -98,48 +95,4 @@ export async function buildApp({ cache, token, webRoot = defaultWebRoot() }: App
   }
 
   return app;
-}
-
-const CSV_COLUMNS: Array<keyof ResourceRow> = [
-  "name",
-  "type",
-  "kind",
-  "resourceGroup",
-  "location",
-  "subscriptionId",
-  "tenantId",
-  "sku",
-  "provisioningState",
-  "tags",
-  "id",
-];
-
-export function csvCell(value: unknown): string {
-  if (value === undefined || value === null) return "";
-  const s =
-    typeof value === "object"
-      ? Object.entries(value as Record<string, unknown>)
-          .map(([k, v]) => `${k}=${String(v)}`)
-          .join("; ")
-      : String(value);
-  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
-
-async function* exportCsv(pages: AsyncGenerator<ResourceRow[]>) {
-  yield CSV_COLUMNS.join(",") + "\n";
-  for await (const rows of pages) {
-    yield rows.map((r) => CSV_COLUMNS.map((c) => csvCell(r[c])).join(",")).join("\n") + (rows.length ? "\n" : "");
-  }
-}
-
-async function* exportJson(pages: AsyncGenerator<ResourceRow[]>) {
-  yield "[";
-  let first = true;
-  for await (const rows of pages) {
-    for (const row of rows) {
-      yield (first ? "\n" : ",\n") + JSON.stringify(row);
-      first = false;
-    }
-  }
-  yield "\n]\n";
 }

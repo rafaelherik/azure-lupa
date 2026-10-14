@@ -257,8 +257,7 @@ function SubscriptionNode({
   const disabled = sub.state !== "Enabled";
   // Known counts only: from the cached scope summary, or the sum of loaded resource groups.
   const count = inScope
-    ? scopeSummary.data?.data.bySubscription.find((b) => b.key.toLowerCase() === sub.subscriptionId.toLowerCase())
-        ?.count
+    ? scopeSummary.data?.bySubscription.find((b) => b.key.toLowerCase() === sub.subscriptionId.toLowerCase())?.count
     : rgs.data?.data.reduce((n, g) => n + (g.resourceCount ?? 0), 0);
 
   const select = (e: MouseEvent) => {

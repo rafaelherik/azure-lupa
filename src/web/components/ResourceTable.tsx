@@ -2,11 +2,12 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import clsx from "clsx";
 import { AlertTriangle, ArrowDown, ArrowUp, ArrowUpDown, SearchX } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { ResourceRow, SortField } from "../../shared/types";
+import { RULES_BY_ID } from "../../shared/orphans";
+import type { SortField } from "../../shared/types";
 import { RequestError } from "../lib/api";
 import { nf, providerOf, typeWithinProvider } from "../lib/format";
-import { iconForType } from "../lib/icons";
-import type { Sort } from "../lib/queries";
+import { ResourceIcon } from "../lib/icons";
+import type { Sort, TableRow as ResourceRow } from "../lib/queries";
 import { useResources, type Scope } from "../lib/queries";
 import { hasFilters, useViewState } from "../lib/state";
 import { Button, Skeleton } from "./ui";
@@ -107,8 +108,8 @@ export function ResourceTable({
 }) {
   const [state, update] = useViewState();
   const query = useResources(scope, state.filters, sort);
-  const rows = useMemo(() => query.data?.pages.flatMap((p) => p.data.rows) ?? [], [query.data]);
-  const total = query.data?.pages[0]?.data.totalRecords ?? 0;
+  const rows = useMemo(() => query.data?.pages.flatMap((p) => p.rows) ?? [], [query.data]);
+  const total = query.data?.pages[0]?.total ?? 0;
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const multiSub = scope.subscriptionIds.length > 1;
@@ -117,15 +118,13 @@ export function ResourceTable({
   const compact = Boolean(state.selectedId);
   const rowHeight = narrow ? 52 : ROW_HEIGHT;
   const columns = useMemo<Column[]>(() => {
-    const nameCell = (r: ResourceRow) => {
-      const Icon = iconForType(r.type);
-      return (
-        <span className="flex min-w-0 items-center gap-2">
-          <Icon aria-hidden className="size-3.5 shrink-0 text-muted" />
-          <span className="name truncate font-medium text-ink">{r.name}</span>
-        </span>
-      );
-    };
+    const nameCell = (r: ResourceRow) => (
+      <span className="flex min-w-0 items-center gap-2">
+        <ResourceIcon type={r.type} className="size-3.5" />
+        <span className="name truncate font-medium text-ink">{r.name}</span>
+        {r.orphanRules && <OrphanBadge rules={r.orphanRules} />}
+      </span>
+    );
     const typeCell = (r: ResourceRow) => (
       <span className="font-mono text-[12px]">
         <span className="text-ink-2">{typeWithinProvider(r.type)}</span>
@@ -338,6 +337,18 @@ export function ResourceTable({
         )}
       </footer>
     </div>
+  );
+}
+
+function OrphanBadge({ rules }: { rules: string[] }) {
+  const titles = rules.map((id) => RULES_BY_ID.get(id)?.title ?? id);
+  return (
+    <span
+      title={`Potential orphan: ${titles.join(", ")}`}
+      className="shrink-0 rounded bg-warn-soft px-1 text-[11px] leading-4 font-medium text-warn"
+    >
+      Orphan?
+    </span>
   );
 }
 

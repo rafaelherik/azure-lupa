@@ -41,6 +41,43 @@ describe("Cache", () => {
     expect((await cache.wrap("k", async () => "newer", { freshAfter: 5 })).data).toBe("new");
   });
 
+  it("concurrent calls for one key share a single load", async () => {
+    const cache = await makeCache({ t: 0 });
+    let calls = 0;
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    const load = async () => {
+      calls++;
+      await gate;
+      return calls;
+    };
+    const a = cache.wrap("k", load);
+    const b = cache.wrap("k", load);
+    release();
+    expect((await a).data).toBe(1);
+    expect((await b).data).toBe(1);
+    expect(calls).toBe(1);
+  });
+
+  it("a refresh joining an in-flight call does not accept an older hit", async () => {
+    const clock = { t: 0 };
+    const cache = await makeCache(clock);
+    await cache.set("k", "old");
+    clock.t = 10;
+    const plain = cache.wrap("k", async () => "unused");
+    const fresh = cache.wrap("k", async () => "new", { freshAfter: 5 });
+    expect((await plain).data).toBe("old");
+    expect((await fresh).data).toBe("new");
+  });
+
+  it("memory: false keeps the value on disk only", async () => {
+    const clock = { t: 0 };
+    const cache = await makeCache(clock);
+    await cache.wrap("big", async () => ({ v: 1 }), { memory: false });
+    expect((cache as unknown as { memory: Map<string, unknown> }).memory.has("big")).toBe(false);
+    expect((await cache.wrap("big", async () => ({ v: 2 }), { memory: false })).data).toEqual({ v: 1 });
+  });
+
   it("keys are stable for equal input", () => {
     expect(Cache.key("x", { a: 1 })).toBe(Cache.key("x", { a: 1 }));
     expect(Cache.key("x", { a: 1 })).not.toBe(Cache.key("x", { a: 2 }));

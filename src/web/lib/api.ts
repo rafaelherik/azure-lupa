@@ -3,11 +3,9 @@ import type {
   Cached,
   ResourceDetails,
   ResourceGroup,
-  ResourcePage,
-  ResourceQuery,
+  Snapshot,
+  SnapshotQuery,
   Subscription,
-  Summary,
-  SummaryQuery,
   Tenant,
 } from "../../shared/types";
 
@@ -68,17 +66,9 @@ export const api = {
     request<Cached<ResourceGroup[]>>(
       `/api/tenants/${tenantId}/subscriptions/${subscriptionId}/resource-groups${q(freshAfter)}`,
     ),
-  resources: (query: ResourceQuery) => request<Cached<ResourcePage>>("/api/resources/query", post(query)),
-  summary: (query: SummaryQuery) => request<Cached<Summary>>("/api/summary", post(query)),
+  snapshot: (query: SnapshotQuery) => request<Cached<Snapshot>>("/api/snapshot", post(query)),
   details: (tenantId: string, id: string, freshAfter?: number) =>
     request<Cached<ResourceDetails>>(
       `/api/resources/details?${new URLSearchParams({ tenantId, id, ...(freshAfter ? { freshAfter: String(freshAfter) } : {}) })}`,
     ),
-  exportUrl: (query: ResourceQuery, format: "csv" | "json") => {
-    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(query))))
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
-    return `/api/export?${new URLSearchParams({ q: encoded, format, token })}`;
-  },
 };

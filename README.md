@@ -25,7 +25,7 @@ npx azure-lupa
 
 If you work across many tenants and subscriptions, for example as a consultant, at an MSP, or on a platform team, the Azure Portal is slow for questions like _"what do we have, and where?"_. azure-lupa is built for that job:
 
-- **Fast.** Data loads lazily, comes from Azure Resource Graph, and is cached locally, so moving around feels instant.
+- **Fast.** Each scope is loaded once from Azure Resource Graph into an in-browser [DuckDB](https://duckdb.org/docs/stable/clients/wasm/overview) database, so filtering, sorting and the dashboard are instant and cost no further API calls.
 - **Multi-tenant.** Browse every tenant your `az login` can reach and combine subscriptions in one view.
 - **Read-only and local.** It never writes to Azure, and it only listens on `127.0.0.1`. Your credentials stay with the Azure CLI.
 - **Zero setup.** No app registration, no service principal, nothing to deploy.
@@ -41,8 +41,10 @@ npx azure-lupa    # starts a local server and opens your browser
 
 - Browse **tenants → subscriptions → resource groups**
 - List every resource in one or more subscriptions, with **search**, **type / location / resource group / tag filters** and sortable columns
-- Open a resource to see its **essentials, tags, property tree and raw JSON**, copy its ID, or jump to the Azure Portal
+- Open a resource to see its **essentials, related resources** (parent, children, what it uses and what uses it), **tags, property tree and raw JSON**, copy its ID, or jump to the Azure Portal
+- **Orphan detection**: resources that look abandoned (unattached disks, unassociated public IPs, NICs and NSGs, empty App Service plans, VNet gateways without connections, empty resource groups and more) are flagged, filterable with **Orphans**, and summarized on the dashboard. The rules follow the [Azure Orphaned Resources workbook](https://github.com/dolevshor/azure-orphan-resources); treat them as hints and confirm before deleting anything
 - A **dashboard** of counts by type, location, subscription and resource group (select a bar to drill in)
+- **Azure service icons** for common resource types
 - **Export** the current view to CSV or JSON
 - `⌘` / `Ctrl` + click a subscription to **combine several in one view**; `Esc` closes the details panel
 
@@ -57,7 +59,8 @@ Tenants that need their own sign-in (MFA or conditional access) show the exact c
 ## How it loads data
 
 - Nothing is fetched until you open it: subscriptions load when you expand a tenant, and resources load when you select a subscription.
-- Resources come from **Azure Resource Graph**, scoped to the selected subscriptions, filtered on the server and paged 500 at a time as you scroll.
+- Selecting subscriptions loads a **snapshot** of their resources from **Azure Resource Graph**. The server keeps only what the UI needs (list fields, the few properties orphan rules check, and the IDs each resource references) and the browser loads it into **DuckDB-Wasm**. Search, filters, sorting, the dashboard, orphan rules, related resources and export all run there as SQL, with no further Azure calls.
+- The DuckDB engine (about 36 MB) is downloaded from [jsDelivr](https://www.jsdelivr.com/package/npm/@duckdb/duckdb-wasm) the first time you select a subscription, pinned to the version azure-lupa was built with, and then cached by the browser. This needs internet access to `cdn.jsdelivr.net`; DuckDB never fetches extensions.
 - Resource details come from ARM, using the newest stable API version of the resource's provider.
 - Responses are cached in `~/.azure-lupa/cache` (15 minutes by default), so reopening the app is instant. **Refresh** fetches the current tenant again.
 - Azure calls are limited to 4 concurrent requests and retry on throttling (`429`), honoring `Retry-After`.
@@ -71,6 +74,10 @@ Tenants that need their own sign-in (MFA or conditional access) show the exact c
     --clear-cache        delete the local cache before starting
 -v, --verbose            log Azure calls and cache hits
 ```
+
+## Icons
+
+Resource type icons come from [`@threeveloper/azure-react-icons`](https://www.npmjs.com/package/@threeveloper/azure-react-icons), which packages Microsoft's [Azure architecture icons](https://learn.microsoft.com/azure/architecture/icons/). The icons remain subject to Microsoft's terms of use.
 
 ## Security
 

@@ -3,12 +3,12 @@ import { Monitor, Moon, PanelLeft, RefreshCw, Sun } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Dashboard } from "./components/Dashboard";
 import { DetailsPanel } from "./components/DetailsPanel";
-import { ResourceTable } from "./components/ResourceTable";
+import { ResourceTable, TableError } from "./components/ResourceTable";
 import { Sidebar } from "./components/Sidebar";
 import { Toolbar } from "./components/Toolbar";
 import { IconButton } from "./components/ui";
 import { timeAgo } from "./lib/format";
-import { refreshTenant, useSubscriptions, useSummary, useTenants } from "./lib/queries";
+import { refreshTenant, useSnapshot, useSubscriptions, useTenants } from "./lib/queries";
 import { useViewState } from "./lib/state";
 import { useTheme, type ThemeChoice } from "./lib/theme";
 import { Toaster } from "./lib/toast";
@@ -37,7 +37,7 @@ export function App() {
   const hasScope = Boolean(scope.tenantId && scope.subscriptionIds.length);
   const subs = useSubscriptions(state.tenantId ?? "", Boolean(state.tenantId));
   const tenants = useTenants();
-  const scopeSummary = useSummary(scope);
+  const snapshot = useSnapshot(scope);
 
   const subscriptionNames = useMemo(
     () => new Map((subs.data?.data ?? []).map((s) => [s.subscriptionId, s.displayName])),
@@ -56,7 +56,7 @@ export function App() {
   useEffect(() => setNavOpen(false), [state.subscriptionIds, state.filters.resourceGroups]);
 
   const ThemeIcon = THEME_ICON[theme];
-  const cached = scopeSummary.data;
+  const cached = snapshot.data;
 
   return (
     <div className="flex h-full">
@@ -101,18 +101,15 @@ export function App() {
             </p>
           )}
           <span className="flex-1" />
-          {hasScope && cached && (
+          {hasScope && (cached || snapshot.isFetching) && (
             <span className="flex items-center gap-2 text-[12px] whitespace-nowrap text-muted">
               <span
                 aria-hidden
-                className={clsx(
-                  "size-1.5 rounded-full",
-                  scopeSummary.isFetching ? "animate-pulse bg-accent" : "bg-faint",
-                )}
+                className={clsx("size-1.5 rounded-full", snapshot.isFetching ? "animate-pulse bg-accent" : "bg-faint")}
               />
               <span className="hidden sm:inline">
-                {scopeSummary.isFetching
-                  ? "Loading from Azure…"
+                {snapshot.isFetching || !cached
+                  ? "Loading inventory from Azure…"
                   : `${cached.fromCache ? "Cached" : "Updated"} ${timeAgo(cached.cachedAt, now)}`}
               </span>
               <span className="hidden text-faint sm:inline">·</span>
@@ -135,7 +132,9 @@ export function App() {
           <>
             <Toolbar scope={scope} sort={state.sort} />
             <div className="relative flex min-h-0 flex-1">
-              {state.view === "resources" ? (
+              {snapshot.error && !snapshot.isFetching ? (
+                <TableError error={snapshot.error} onRetry={() => void snapshot.refetch()} />
+              ) : state.view === "resources" ? (
                 <ResourceTable scope={scope} sort={state.sort} subscriptionNames={subscriptionNames} />
               ) : (
                 <Dashboard scope={scope} subscriptionNames={subscriptionNames} />
