@@ -1,6 +1,6 @@
 {
   "name": "azure-lupa",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Open-source, local and read-only explorer for navigating your Azure resource inventory",
   "repository": {
     "type": "git",
@@ -16,7 +16,8 @@
   },
   "files": [
     "bin",
-    "dist"
+    "dist",
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=24"
