@@ -107,7 +107,15 @@ With [Task](https://taskfile.dev) installed, `task dev`, `task test`, `task lint
 
 1. Label PRs (`feature`, `fix`, `chore`, `docs`, `breaking`, …), or let the autolabeler do it from the branch name or the conventional PR title.
 2. Each merge to `main` updates a **draft** GitHub release. Its version comes from the labels: `breaking` → major, `feature` → minor, everything else → patch.
-3. When you're ready, review the draft and click **Publish release**. That runs `.github/workflows/release.yml`, which sets `package.json` to the tag's version and publishes to npm with provenance.
+3. When you're ready, review the draft and click **Publish release**. That runs `.github/workflows/release.yml`, which sets `package.json` to the tag's version and **stages** it on npm with provenance, through npm trusted publishing (no tokens or secrets).
+4. Approve the staged version with 2FA to make it public. The workflow run's summary shows the commands:
+
+   ```sh
+   npm stage list azure-lupa
+   npm stage approve <stage-id>
+   ```
+
+   Releases marked as pre-release are staged under the `next` tag instead of `latest`.
 
 ## License
 
