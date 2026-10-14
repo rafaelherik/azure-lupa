@@ -1,6 +1,8 @@
 name: Release
 
-# Runs only when a GitHub release is published (not when drafted).
+# Runs only when a GitHub release is published (not when drafted). The package is staged on npm
+# through the trusted publisher (OIDC, no token); a maintainer then approves it with 2FA:
+#   npm stage list azure-lupa && npm stage approve <stage-id>
 on:
   release:
     types: [published]
@@ -19,17 +21,29 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
           # No dependency cache in the publish job (cache-poisoning risk).
-      # Trusted publishing needs npm >= 11.5.1
-      - run: npm install -g npm@latest
+      # `npm stage` needs npm >= 12.2
+      - run: npm install -g npm@^12.2.0
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
       - name: Set version from release tag
         run: npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version --allow-same-version
       - run: npm run build
-      - name: Publish to npm
-        run: npm publish --access public --provenance ${{ github.event.release.prerelease && '--tag next' || '' }}
-        env:
-          # Only used until the trusted publisher is configured on npmjs.com;
-          # afterwards OIDC takes precedence and the secret can be deleted.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Stage on npm
+        run: |
+          set -o pipefail # keep npm's exit status through tee
+          npm stage publish --access public --provenance ${{ github.event.release.prerelease && '--tag next' || '' }} | tee stage.log
+          {
+            echo "### ${GITHUB_REF_NAME} is staged on npm"
+            echo
+            echo "It is not public until a maintainer approves it with 2FA:"
+            echo
+            echo '```sh'
+            echo "npm stage list azure-lupa"
+            echo "npm stage approve <stage-id>"
+            echo '```'
+            echo
+            echo '```'
+            cat stage.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
