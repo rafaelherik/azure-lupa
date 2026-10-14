@@ -26,6 +26,7 @@ export function parse(search: string): ViewState {
       locations: list(p.get("locations")),
       resourceGroups: list(p.get("rgs")),
       tags: list(p.get("tags")),
+      orphansOnly: p.get("orphans") === "1" || undefined,
     },
     sort: { field: (field as SortField) || "name", dir: dir === "desc" ? "desc" : "asc" },
     selectedId: p.get("id") ?? undefined,
@@ -46,6 +47,7 @@ export function serialize(s: ViewState): string {
   set("locations", s.filters.locations);
   set("rgs", s.filters.resourceGroups);
   set("tags", s.filters.tags);
+  if (s.filters.orphansOnly) set("orphans", "1");
   if (s.sort.field !== "name" || s.sort.dir !== "asc") set("sort", `${s.sort.field}:${s.sort.dir}`);
   set("id", s.selectedId);
   const str = p.toString().replace(/%2C/g, ",");
@@ -89,4 +91,6 @@ export function useViewState() {
 }
 
 export const hasFilters = (f: ResourceFilters) =>
-  Boolean(f.search || f.types?.length || f.locations?.length || f.resourceGroups?.length || f.tags?.length);
+  Boolean(
+    f.search || f.types?.length || f.locations?.length || f.resourceGroups?.length || f.tags?.length || f.orphansOnly,
+  );

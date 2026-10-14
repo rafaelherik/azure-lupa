@@ -1,19 +1,16 @@
 import type {
   Cached,
-  CountBucket,
   ResourceDetails,
   ResourceGroup,
-  ResourcePage,
-  ResourceQuery,
-  ResourceRow,
+  Snapshot,
+  SnapshotQuery,
   Subscription,
-  Summary,
-  SummaryQuery,
   Tenant,
 } from "../../shared/types.js";
 import { Cache } from "../cache.js";
 import { AzureError, armFetch } from "./http.js";
-import { countByQuery, resourceGroupCountsQuery, resourceGroupsQuery, resourcesQuery } from "./kql.js";
+import { resourceGroupCountsQuery, resourceGroupsQuery } from "./kql.js";
+import { SNAPSHOT_VERSION, snapshotQuery, toSnapshotRow, type RawSnapshotRow } from "./snapshot.js";
 
 const PAGE_SIZE = 500;
 const DAY = 24 * 60 * 60_000;
@@ -63,7 +60,7 @@ export class Inventory {
     });
   }
 
-  /** All pages of a Resource Graph query (used for small result sets and exports). */
+  /** All pages of a Resource Graph query. */
   private async *graphAll<T>(tenantId: string, subscriptions: string[], query: string): AsyncGenerator<T[]> {
     let skipToken: string | undefined;
     do {
@@ -139,40 +136,27 @@ export class Inventory {
     );
   }
 
-  resources(q: ResourceQuery): Promise<Cached<ResourcePage>> {
-    const subs = [...q.subscriptionIds].sort();
-    const query = resourcesQuery(q.filters, q.sort);
-    return this.cache.wrap(
-      Cache.key("res", [q.tenantId, subs, query, q.skipToken ?? null]),
-      async () => {
-        const page = await this.graph<ResourceRow>(q.tenantId, subs, query, { skipToken: q.skipToken });
-        return { rows: page.data, skipToken: page.$skipToken, totalRecords: page.totalRecords };
-      },
-      { freshAfter: q.freshAfter },
-    );
-  }
-
-  async *exportRows(q: ResourceQuery): AsyncGenerator<ResourceRow[]> {
-    yield* this.graphAll<ResourceRow>(q.tenantId, q.subscriptionIds, resourcesQuery(q.filters, q.sort));
-  }
-
-  summary(q: SummaryQuery): Promise<Cached<Summary>> {
+  /**
+   * The whole inventory of a scope in one pass, for the browser engine: after this, filtering,
+   * sorting, summaries, orphan rules and relations run locally without further Azure calls.
+   */
+  snapshot(q: SnapshotQuery): Promise<Cached<Snapshot>> {
     const subs = [...q.subscriptionIds].sort();
     return this.cache.wrap(
-      Cache.key("sum", [q.tenantId, subs, q.filters ?? {}]),
+      Cache.key("snap", [SNAPSHOT_VERSION, q.tenantId, subs]),
       async () => {
-        const count = (col: Parameters<typeof countByQuery>[0]) =>
-          this.graphCollect<CountBucket>(q.tenantId, subs, countByQuery(col, q.filters));
-        const [byType, byLocation, bySubscription, byResourceGroup] = await Promise.all([
-          count("type"),
-          count("location"),
-          count("subscriptionId"),
-          count("resourceGroup"),
+        const resources: Snapshot["resources"] = [];
+        const [, resourceGroups] = await Promise.all([
+          (async () => {
+            for await (const rows of this.graphAll<RawSnapshotRow>(q.tenantId, subs, snapshotQuery()))
+              for (const raw of rows) resources.push(toSnapshotRow(raw));
+          })(),
+          this.graphCollect<ResourceGroup>(q.tenantId, subs, resourceGroupsQuery()),
         ]);
-        const total = byType.reduce((n, b) => n + b.count, 0);
-        return { total, byType, byLocation, bySubscription, byResourceGroup };
+        return { resources, resourceGroups };
       },
-      { freshAfter: q.freshAfter },
+      // snapshots can be large; keep them on disk rather than in the process
+      { freshAfter: q.freshAfter, memory: false },
     );
   }
 

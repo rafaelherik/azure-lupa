@@ -1,10 +1,20 @@
 import clsx from "clsx";
-import { ChevronRight, Copy, ExternalLink, RefreshCw, X } from "lucide-react";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { ChevronRight, Copy, ExternalLink, RefreshCw, TriangleAlert, X } from "lucide-react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { RULES_BY_ID } from "../../shared/orphans";
 import { RequestError } from "../lib/api";
-import { portalUrl, timeAgo } from "../lib/format";
-import { iconForType } from "../lib/icons";
-import { refreshTenant, useDetails } from "../lib/queries";
+import { portalUrl, timeAgo, typeWithinProvider } from "../lib/format";
+import { ResourceIcon } from "../lib/icons";
+import {
+  refreshTenant,
+  useDetails,
+  useKnownIds,
+  useOrphanRules,
+  useRelated,
+  useSnapshot,
+  type Relation,
+  type RelatedResource,
+} from "../lib/queries";
 import { useViewState } from "../lib/state";
 import { copy } from "../lib/toast";
 import { Button, IconButton, Skeleton } from "./ui";
@@ -14,6 +24,20 @@ type Tab = "overview" | "properties" | "json";
 const str = (v: unknown) => (typeof v === "string" && v ? v : undefined);
 const obj = (v: unknown) =>
   v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : undefined;
+
+/** Lets values deep in the property tree link to resources loaded in the current snapshot. */
+const ResourceLinks = createContext<{ known?: Set<string>; open: (id: string) => void }>({ open: () => {} });
+
+/** Every ARM id string inside a value (capped, to keep the lookup query small). */
+function armIdsIn(value: unknown, out = new Set<string>()): string[] {
+  if (out.size >= 200) return [...out];
+  if (typeof value === "string") {
+    if (value.startsWith("/subscriptions/")) out.add(value);
+  } else if (value && typeof value === "object") {
+    for (const v of Object.values(value)) armIdsIn(v, out);
+  }
+  return [...out];
+}
 
 export function DetailsPanel({
   tenantId,
@@ -27,12 +51,20 @@ export function DetailsPanel({
   const [state, update] = useViewState();
   const [tab, setTab] = useState<Tab>("overview");
   const details = useDetails(tenantId, id);
+  const scope = useMemo(
+    () => ({ tenantId: state.tenantId, subscriptionIds: state.subscriptionIds }),
+    [state.tenantId, state.subscriptionIds],
+  );
+  const schema = useSnapshot(scope).data?.schema;
   const r = details.data?.data.resource;
   const parts = id.split("/");
   const name = str(r?.name) ?? parts.at(-1) ?? id;
-  const type = str(r?.type) ?? "";
-  const Icon = iconForType(type || id.split("/providers/")[1] || "");
+  const type = str(r?.type) ?? typeFromId(id);
   const close = () => update({ selectedId: undefined }, { replace: true });
+  const open = (target: string) => update({ selectedId: target });
+  const propertyIds = useMemo(() => armIdsIn(r?.properties), [r]);
+  const known = useKnownIds(schema, propertyIds).data;
+  const links = useMemo(() => ({ known, open }), [known]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -54,7 +86,7 @@ export function DetailsPanel({
       <header className="shrink-0 border-b border-line px-5 pt-4">
         <div className="flex items-start gap-2.5">
           <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-md border border-line bg-panel">
-            <Icon className="size-4 text-ink-2" />
+            <ResourceIcon type={type} className="size-4.5" />
           </span>
           <div className="min-w-0 flex-1">
             <h2 className="truncate text-[15px] leading-6 font-semibold" title={name}>
@@ -102,39 +134,44 @@ export function DetailsPanel({
         </div>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        {details.isPending && (
-          <div className="space-y-4 p-5">
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="grid grid-cols-[120px_1fr] gap-3">
-                <Skeleton className="w-20" />
-                <Skeleton className={i % 2 ? "w-1/2" : "w-3/4"} />
-              </div>
-            ))}
-          </div>
-        )}
-        {details.error && <DetailsError error={details.error} onRetry={() => void details.refetch()} />}
-        {r && tab === "overview" && (
-          <Overview
-            r={r}
-            id={id}
-            apiVersion={details.data!.data.apiVersion}
-            subscriptionNames={subscriptionNames}
-            onFilterRg={(rg) => addFilter({ resourceGroups: [rg] })}
-            onFilterTag={(t) => addFilter({ tags: [...new Set([...(state.filters.tags ?? []), t])] })}
-          />
-        )}
-        {r && tab === "properties" && (
-          <div className="p-3">
-            {obj(r.properties) ? (
-              <PropertyTree value={r.properties} depth={0} />
-            ) : (
-              <p className="p-2 text-[13px] text-muted">This resource has no properties.</p>
-            )}
-          </div>
-        )}
-        {r && tab === "json" && <JsonView value={r} />}
-      </div>
+      <ResourceLinks.Provider value={links}>
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {details.isPending && (
+            <div className="space-y-4 p-5">
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="grid grid-cols-[120px_1fr] gap-3">
+                  <Skeleton className="w-20" />
+                  <Skeleton className={i % 2 ? "w-1/2" : "w-3/4"} />
+                </div>
+              ))}
+            </div>
+          )}
+          {details.error && <DetailsError error={details.error} onRetry={() => void details.refetch()} />}
+          {tab === "overview" && <OrphanCallout schema={schema} id={id} />}
+          {r && tab === "overview" && (
+            <Overview
+              r={r}
+              id={id}
+              schema={schema}
+              tenantId={tenantId}
+              apiVersion={details.data!.data.apiVersion}
+              subscriptionNames={subscriptionNames}
+              onFilterRg={(rg) => addFilter({ resourceGroups: [rg] })}
+              onFilterTag={(t) => addFilter({ tags: [...new Set([...(state.filters.tags ?? []), t])] })}
+            />
+          )}
+          {r && tab === "properties" && (
+            <div className="p-3">
+              {obj(r.properties) ? (
+                <PropertyTree value={r.properties} depth={0} />
+              ) : (
+                <p className="p-2 text-[13px] text-muted">This resource has no properties.</p>
+              )}
+            </div>
+          )}
+          {r && tab === "json" && <JsonView value={r} />}
+        </div>
+      </ResourceLinks.Provider>
 
       {details.data && (
         <footer className="flex h-10 shrink-0 items-center gap-2 border-t border-line bg-panel px-5 text-[12px] text-muted">
@@ -167,9 +204,138 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 
 const Dash = () => <span className="text-faint">—</span>;
 
+/** "…/providers/Microsoft.Sql/servers/s/databases/d" → "Microsoft.Sql/servers/databases". */
+function typeFromId(id: string): string {
+  const parts = id.split("/");
+  const p = parts.map((x) => x.toLowerCase()).lastIndexOf("providers");
+  if (p === -1 || !parts[p + 1]) return "";
+  return [parts[p + 1], ...parts.slice(p + 2).filter((_, i) => i % 2 === 0)].join("/");
+}
+
+function OrphanCallout({ schema, id }: { schema?: string; id: string }) {
+  const rules = useOrphanRules(schema, id).data ?? [];
+  if (!rules.length) return null;
+  return (
+    <div className="mx-5 mt-4 rounded-md border border-warn/40 bg-warn-soft px-3 py-2.5">
+      {rules.map((ruleId) => {
+        const rule = RULES_BY_ID.get(ruleId);
+        return (
+          <div key={ruleId} className="flex gap-2">
+            <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warn" />
+            <div className="min-w-0 text-[13px]">
+              <p className="font-medium text-warn">Potential orphan: {rule?.title ?? ruleId}</p>
+              {rule && (
+                <p className="mt-0.5 text-ink-2">
+                  {rule.reason}{" "}
+                  <a href={rule.learnUrl} target="_blank" rel="noreferrer" className="text-accent hover:underline">
+                    Microsoft Learn
+                  </a>
+                </p>
+              )}
+              <p className="mt-1 text-[12px] text-muted">
+                A heuristic. Confirm in the portal before deleting anything.
+              </p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+const RELATIONS: Array<{ key: Relation; label: string }> = [
+  { key: "parent", label: "Parent" },
+  { key: "child", label: "Contains" },
+  { key: "linked", label: "Linked both ways" },
+  { key: "uses", label: "Uses" },
+  { key: "usedBy", label: "Used by" },
+  { key: "external", label: "Outside the loaded scope" },
+];
+
+function Related({ schema, id, tenantId }: { schema?: string; id: string; tenantId: string }) {
+  const related = useRelated(schema, id);
+  const { open } = useContext(ResourceLinks);
+  const groups = useMemo(() => {
+    const rows = related.data ?? [];
+    // References in both directions (a NIC and its VM name each other) are listed once.
+    const uses = new Set(rows.filter((r) => r.relation === "uses").map((r) => r.id));
+    const both = new Set(rows.filter((r) => r.relation === "usedBy" && uses.has(r.id)).map((r) => r.id));
+    const by = new Map<Relation, RelatedResource[]>();
+    for (const r of rows) {
+      const relation = both.has(r.id) && (r.relation === "uses" || r.relation === "usedBy") ? "linked" : r.relation;
+      if (relation === "linked" && r.relation === "usedBy") continue;
+      by.set(relation, [...(by.get(relation) ?? []), { ...r, relation }]);
+    }
+    return RELATIONS.filter((g) => by.has(g.key)).map((g) => ({ ...g, items: by.get(g.key)! }));
+  }, [related.data]);
+  const count = groups.reduce((n, g) => n + g.items.length, 0);
+
+  return (
+    <>
+      <h3 className="pt-4 pb-2 text-[12px] font-semibold text-ink">
+        Related <span className="font-normal text-muted">{related.data ? count : ""}</span>
+      </h3>
+      {!schema || related.isPending ? (
+        <div className="space-y-2">
+          <Skeleton className="w-2/3" />
+          <Skeleton className="w-1/2" />
+        </div>
+      ) : count === 0 ? (
+        <p className="text-[13px] text-muted">No references to or from other resources in this scope.</p>
+      ) : (
+        <div className="space-y-3 border-b border-line pb-3">
+          {groups.map((g) => (
+            <div key={g.key}>
+              <p className="pb-1 text-[11px] font-medium tracking-wide text-muted uppercase">{g.label}</p>
+              <ul>
+                {g.items.map((item) =>
+                  item.relation === "external" ? (
+                    <li key={item.id} className="flex items-center gap-2 py-1">
+                      <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-ink-2" title={item.id}>
+                        {item.id}
+                      </span>
+                      <a
+                        href={portalUrl(item.id, tenantId)}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="Open in Azure Portal"
+                        title="Open in Azure Portal"
+                        className="shrink-0 text-faint hover:text-accent"
+                      >
+                        <ExternalLink className="size-3.5" />
+                      </a>
+                    </li>
+                  ) : (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        onClick={() => open(item.id)}
+                        title={item.id}
+                        className="-mx-2 flex w-[calc(100%+16px)] items-center gap-2 rounded px-2 py-1 text-left hover:bg-hover"
+                      >
+                        <ResourceIcon type={item.type ?? ""} className="size-4" />
+                        <span className="min-w-0 truncate text-[13px] text-accent">{item.name}</span>
+                        <span className="ml-auto shrink-0 truncate font-mono text-[11px] text-faint">
+                          {typeWithinProvider(item.type ?? "")}
+                        </span>
+                      </button>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 function Overview({
   r,
   id,
+  schema,
+  tenantId,
   apiVersion,
   subscriptionNames,
   onFilterRg,
@@ -177,6 +343,8 @@ function Overview({
 }: {
   r: Record<string, unknown>;
   id: string;
+  schema?: string;
+  tenantId: string;
   apiVersion: string;
   subscriptionNames: Map<string, string>;
   onFilterRg: (rg: string) => void;
@@ -259,6 +427,8 @@ function Overview({
         </Row>
       </dl>
 
+      <Related schema={schema} id={id} tenantId={tenantId} />
+
       <h3 className="pt-4 pb-2 text-[12px] font-semibold text-ink">
         Tags <span className="font-normal text-muted">{tags.length}</span>
       </h3>
@@ -288,10 +458,23 @@ function isScalar(v: unknown) {
 }
 
 function Scalar({ v }: { v: unknown }) {
+  const { known, open } = useContext(ResourceLinks);
   if (v === null) return <span className="text-faint">null</span>;
   if (typeof v === "boolean") return <span className="font-mono text-[12px] text-accent-ink">{String(v)}</span>;
   if (typeof v === "number") return <span className="font-mono text-[12px] text-accent-ink">{v}</span>;
   const s = String(v);
+  if (known?.has(s.toLowerCase())) {
+    return (
+      <button
+        type="button"
+        onClick={() => open(s)}
+        title="Open this resource"
+        className="text-left font-mono text-[11px] break-all text-accent hover:underline"
+      >
+        {s}
+      </button>
+    );
+  }
   return (
     <span className={clsx("break-all", s.startsWith("/subscriptions/") && "font-mono text-[11px]")}>
       {s || <span className="text-faint">""</span>}

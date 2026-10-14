@@ -1,5 +1,7 @@
 // DTOs shared by the local API server and the web UI.
 
+import type { Facts } from "./orphans.js";
+
 export interface Cached<T> {
   data: T;
   /** Epoch ms when the data was fetched from Azure. */
@@ -52,25 +54,11 @@ export interface ResourceFilters {
   resourceGroups?: string[];
   /** Tag filters as key or key=value. */
   tags?: string[];
+  /** Only resources flagged by an orphan rule. */
+  orphansOnly?: boolean;
 }
 
 export type SortField = "name" | "type" | "location" | "resourceGroup" | "subscriptionId";
-
-export interface ResourceQuery {
-  tenantId: string;
-  subscriptionIds: string[];
-  filters?: ResourceFilters;
-  sort?: { field: SortField; dir: "asc" | "desc" };
-  skipToken?: string;
-  /** Epoch ms; cached data older than this is refetched from Azure. */
-  freshAfter?: number;
-}
-
-export interface ResourcePage {
-  rows: ResourceRow[];
-  skipToken?: string;
-  totalRecords: number;
-}
 
 export interface CountBucket {
   key: string;
@@ -85,10 +73,23 @@ export interface Summary {
   byResourceGroup: CountBucket[];
 }
 
-export interface SummaryQuery {
+/** A resource as shipped to the browser engine: list fields plus what orphan rules and relations need. */
+export interface SnapshotRow extends ResourceRow {
+  managedBy?: string;
+  facts?: Facts;
+  /** Lowercased ARM ids referenced from the resource's properties. */
+  refs?: string[];
+}
+
+export interface Snapshot {
+  resources: SnapshotRow[];
+  resourceGroups: ResourceGroup[];
+}
+
+export interface SnapshotQuery {
   tenantId: string;
   subscriptionIds: string[];
-  filters?: ResourceFilters;
+  /** Epoch ms; cached data older than this is refetched from Azure. */
   freshAfter?: number;
 }
 

@@ -1,10 +1,11 @@
 import clsx from "clsx";
-import { Check, ChevronDown, Download, Plus, Search, X } from "lucide-react";
+import { Check, ChevronDown, Download, Plus, Search, TriangleAlert, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { CSV_COLUMNS, toCsv } from "../../shared/csv";
 import type { CountBucket, ResourceFilters } from "../../shared/types";
-import { api } from "../lib/api";
 import { nf, typeWithinProvider } from "../lib/format";
-import { useSummary, type Scope, type Sort } from "../lib/queries";
+import { queryAllRows, useSnapshot, useSummary, type Scope, type Sort } from "../lib/queries";
+import { toast } from "../lib/toast";
 import { hasFilters, useViewState } from "../lib/state";
 import { Button, Popover } from "./ui";
 
@@ -38,18 +39,32 @@ export function Toolbar({ scope, sort }: { scope: Scope; sort: Sort }) {
           key={f.key}
           label={f.label}
           format={f.format}
-          options={facets.data?.data[f.bucket] ?? []}
+          options={facets.data?.[f.bucket] ?? []}
           loading={facets.isPending}
           selected={state.filters[f.key] ?? []}
           onChange={(values) => setFilters({ [f.key]: values })}
         />
       ))}
       <TagChip selected={state.filters.tags ?? []} onChange={(tags) => setFilters({ tags })} />
+      <OrphanChip
+        active={Boolean(state.filters.orphansOnly)}
+        count={facets.data?.orphans.reduce((n, b) => n + b.count, 0)}
+        onChange={(on) => setFilters({ orphansOnly: on || undefined })}
+      />
       {hasFilters(state.filters) && (
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setFilters({ search: undefined, types: [], locations: [], resourceGroups: [], tags: [] })}
+          onClick={() =>
+            setFilters({
+              search: undefined,
+              types: [],
+              locations: [],
+              resourceGroups: [],
+              tags: [],
+              orphansOnly: undefined,
+            })
+          }
         >
           Clear filters
         </Button>
@@ -295,16 +310,56 @@ function TagChip({ selected, onChange }: { selected: string[]; onChange: (v: str
   );
 }
 
+function OrphanChip({ active, count, onChange }: { active: boolean; count?: number; onChange: (on: boolean) => void }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={() => onChange(!active)}
+      title="Resources that look orphaned, following the Azure Orphaned Resources workbook"
+      className={clsx(
+        "inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[12px] font-medium transition-colors duration-150",
+        active
+          ? "border border-warn bg-warn-soft text-warn"
+          : "border border-dashed border-faint bg-raised text-ink-2 hover:bg-hover",
+      )}
+    >
+      <TriangleAlert className={clsx("size-3.5", active ? "text-warn" : "text-faint")} />
+      Orphans
+      {count !== undefined && <span className={active ? "text-warn" : "text-faint"}>{nf.format(count)}</span>}
+    </button>
+  );
+}
+
+function download(content: string, type: string, ext: string) {
+  const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const a = Object.assign(document.createElement("a"), { href: url, download: `azure-inventory-${stamp}.${ext}` });
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 function ExportMenu({ scope, filters, sort }: { scope: Scope; filters: ResourceFilters; sort: Sort }) {
-  const disabled = !scope.tenantId || !scope.subscriptionIds.length;
-  const url = (format: "csv" | "json") =>
-    api.exportUrl({ tenantId: scope.tenantId!, subscriptionIds: scope.subscriptionIds, filters, sort }, format);
+  const schema = useSnapshot(scope).data?.schema;
+  const run = async (format: "csv" | "json") => {
+    if (!schema) return;
+    try {
+      const rows = (await queryAllRows(schema, filters, sort)).map(({ orphanRules, ...r }) => ({
+        ...r,
+        orphan: orphanRules?.join(";"),
+      }));
+      if (format === "csv") download(toCsv(rows, [...CSV_COLUMNS, "orphan"]), "text/csv;charset=utf-8", "csv");
+      else download(JSON.stringify(rows, null, 2) + "\n", "application/json", "json");
+    } catch (err) {
+      toast(`Export failed: ${String(err)}`);
+    }
+  };
   return (
     <Popover
       align="end"
       width={240}
       trigger={({ toggle }) => (
-        <Button onClick={toggle} disabled={disabled}>
+        <Button onClick={toggle} disabled={!schema}>
           <Download className="size-3.5" />
           Export
           <ChevronDown className="size-3.5 text-faint" />
@@ -314,17 +369,20 @@ function ExportMenu({ scope, filters, sort }: { scope: Scope; filters: ResourceF
       {(close) => (
         <div className="p-1">
           {(["csv", "json"] as const).map((f) => (
-            <a
+            <button
               key={f}
-              href={disabled ? undefined : url(f)}
-              onClick={close}
-              className="flex flex-col rounded px-2.5 py-1.5 hover:bg-hover"
+              type="button"
+              onClick={() => {
+                close();
+                void run(f);
+              }}
+              className="flex w-full flex-col rounded px-2.5 py-1.5 text-left hover:bg-hover"
             >
               <span className="text-[12px] font-medium">{f.toUpperCase()}</span>
               <span className="text-[11px] text-muted">
                 {f === "csv" ? "Spreadsheet-friendly, tags flattened" : "One object per resource"}
               </span>
-            </a>
+            </button>
           ))}
           <p className="border-t border-line px-2.5 pt-1.5 pb-1 text-[11px] text-muted">
             Exports every resource matching the current filters.
