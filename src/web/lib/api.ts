@@ -65,7 +65,9 @@ export const api = {
   subscriptions: (tenantId: string, freshAfter?: number) =>
     request<Cached<Subscription[]>>(`/api/tenants/${tenantId}/subscriptions${q(freshAfter)}`),
   resourceGroups: (tenantId: string, subscriptionId: string, freshAfter?: number) =>
-    request<Cached<ResourceGroup[]>>(`/api/tenants/${tenantId}/subscriptions/${subscriptionId}/resource-groups${q(freshAfter)}`),
+    request<Cached<ResourceGroup[]>>(
+      `/api/tenants/${tenantId}/subscriptions/${subscriptionId}/resource-groups${q(freshAfter)}`,
+    ),
   resources: (query: ResourceQuery) => request<Cached<ResourcePage>>("/api/resources/query", post(query)),
   summary: (query: SummaryQuery) => request<Cached<Summary>>("/api/summary", post(query)),
   details: (tenantId: string, id: string, freshAfter?: number) =>

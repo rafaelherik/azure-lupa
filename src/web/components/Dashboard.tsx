@@ -28,7 +28,8 @@ export function Dashboard({ scope, subscriptionNames }: { scope: Scope; subscrip
               <b className="text-[15px] font-semibold text-ink">{nf.format(s.total)}</b> resources across{" "}
               <b className="font-semibold text-ink">{nf.format(s.byType.length)}</b> types,{" "}
               <b className="font-semibold text-ink">{nf.format(s.byLocation.length)}</b> locations and{" "}
-              <b className="font-semibold text-ink">{nf.format(s.byResourceGroup.length)}</b> resource groups. Select a bar to list those resources.
+              <b className="font-semibold text-ink">{nf.format(s.byResourceGroup.length)}</b> resource groups. Select a
+              bar to list those resources.
             </>
           ) : (
             <Skeleton className="h-4 w-96" />
@@ -36,9 +37,20 @@ export function Dashboard({ scope, subscriptionNames }: { scope: Scope; subscrip
         </p>
 
         <div className="mt-5 grid items-start gap-4 xl:grid-cols-2">
-          <BarList title="By type" data={s?.byType} format={typeWithinProvider} sub={(k) => k.split("/")[0]} onPick={(k) => drill({ types: [k] })} />
+          <BarList
+            title="By type"
+            data={s?.byType}
+            format={typeWithinProvider}
+            sub={(k) => k.split("/")[0]}
+            onPick={(k) => drill({ types: [k] })}
+          />
           <div className="grid gap-4">
-            <BarList title="By location" data={s?.byLocation} format={(k) => k || "global / none"} onPick={(k) => k && drill({ locations: [k] })} />
+            <BarList
+              title="By location"
+              data={s?.byLocation}
+              format={(k) => k || "global / none"}
+              onPick={(k) => k && drill({ locations: [k] })}
+            />
             <BarList
               title="By subscription"
               data={s?.bySubscription}
@@ -46,7 +58,11 @@ export function Dashboard({ scope, subscriptionNames }: { scope: Scope; subscrip
               sub={(k) => (subscriptionNames.has(k) ? k : undefined)}
               onPick={(k) => update({ subscriptionIds: [k], view: "resources", selectedId: undefined })}
             />
-            <BarList title="By resource group" data={s?.byResourceGroup} onPick={(k) => drill({ resourceGroups: [k] })} />
+            <BarList
+              title="By resource group"
+              data={s?.byResourceGroup}
+              onPick={(k) => drill({ resourceGroups: [k] })}
+            />
           </div>
         </div>
       </div>
@@ -76,7 +92,11 @@ function BarList({
     <section className="rounded-lg border border-line bg-raised">
       <header className="flex h-11 items-center justify-between border-b border-line px-4">
         <h2 className="text-[13px] font-semibold">{title}</h2>
-        {data && <span className="text-[12px] text-muted">{nf.format(data.length)} {data.length === 1 ? "group" : "groups"}</span>}
+        {data && (
+          <span className="text-[12px] text-muted">
+            {nf.format(data.length)} {data.length === 1 ? "group" : "groups"}
+          </span>
+        )}
       </header>
       <ol className="p-2">
         {!data &&
@@ -118,7 +138,11 @@ function BarList({
       </ol>
       {data && data.length > TOP && (
         <div className="border-t border-line px-4 py-2">
-          <button type="button" onClick={() => setAll((a) => !a)} className={clsx("text-[12px] font-medium text-accent hover:underline")}>
+          <button
+            type="button"
+            onClick={() => setAll((a) => !a)}
+            className={clsx("text-[12px] font-medium text-accent hover:underline")}
+          >
             {all ? "Show top 10" : `Show all ${nf.format(data.length)}`}
           </button>
         </div>

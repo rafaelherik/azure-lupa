@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { Check, ChevronDown, Download, Plus, Search, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { CountBucket, ResourceFilters } from "../../shared/types";
 import { api } from "../lib/api";
 import { nf, typeWithinProvider } from "../lib/format";
@@ -10,7 +10,12 @@ import { Button, Popover } from "./ui";
 
 type FacetKey = "types" | "locations" | "resourceGroups";
 
-const FACETS: Array<{ key: FacetKey; label: string; bucket: "byType" | "byLocation" | "byResourceGroup"; format?: (v: string) => string }> = [
+const FACETS: Array<{
+  key: FacetKey;
+  label: string;
+  bucket: "byType" | "byLocation" | "byResourceGroup";
+  format?: (v: string) => string;
+}> = [
   { key: "types", label: "Type", bucket: "byType", format: typeWithinProvider },
   { key: "locations", label: "Location", bucket: "byLocation" },
   { key: "resourceGroups", label: "Resource group", bucket: "byResourceGroup" },
@@ -24,7 +29,10 @@ export function Toolbar({ scope, sort }: { scope: Scope; sort: Sort }) {
 
   return (
     <div className="flex min-h-14 shrink-0 flex-wrap items-center gap-2 border-b border-line px-4 py-3 md:px-6">
-      <SearchBox value={state.filters.search ?? ""} onChange={(search) => setFilters({ search: search || undefined })} />
+      <SearchBox
+        value={state.filters.search ?? ""}
+        onChange={(search) => setFilters({ search: search || undefined })}
+      />
       {FACETS.map((f) => (
         <FacetChip
           key={f.key}
@@ -38,7 +46,11 @@ export function Toolbar({ scope, sort }: { scope: Scope; sort: Sort }) {
       ))}
       <TagChip selected={state.filters.tags ?? []} onChange={(tags) => setFilters({ tags })} />
       {hasFilters(state.filters) && (
-        <Button variant="ghost" size="sm" onClick={() => setFilters({ search: undefined, types: [], locations: [], resourceGroups: [], tags: [] })}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setFilters({ search: undefined, types: [], locations: [], resourceGroups: [], tags: [] })}
+        >
           Clear filters
         </Button>
       )}
@@ -50,7 +62,6 @@ export function Toolbar({ scope, sort }: { scope: Scope; sort: Sort }) {
 
 function SearchBox({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [text, setText] = useState(value);
-  const ref = useRef<HTMLInputElement>(null);
   useEffect(() => setText(value), [value]);
   useEffect(() => {
     if (text === value) return;
@@ -58,24 +69,11 @@ function SearchBox({ value, onChange }: { value: string; onChange: (v: string) =
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text]);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
-      if (e.key === "/" && !/INPUT|TEXTAREA|SELECT/.test(target.tagName)) {
-        e.preventDefault();
-        ref.current?.focus();
-        ref.current?.select();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
   return (
     <label className="relative w-full sm:w-80">
       <span className="sr-only">Search resources</span>
       <Search className="pointer-events-none absolute top-2 left-2.5 size-4 text-faint" />
       <input
-        ref={ref}
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
@@ -88,9 +86,13 @@ function SearchBox({ value, onChange }: { value: string; onChange: (v: string) =
         placeholder="Search name, type or resource group"
         className="h-8 w-full rounded-md border border-line bg-raised pr-8 pl-8 text-[13px] text-ink outline-none placeholder:text-faint focus:border-accent focus:ring-3 focus:ring-ring"
       />
-      {!text && <kbd className="pointer-events-none absolute top-2 right-2">/</kbd>}
       {text && (
-        <button type="button" aria-label="Clear search" onClick={() => setText("")} className="absolute top-2 right-2 text-faint hover:text-ink">
+        <button
+          type="button"
+          aria-label="Clear search"
+          onClick={() => setText("")}
+          className="absolute top-2 right-2 text-faint hover:text-ink"
+        >
           <X className="size-4" />
         </button>
       )}
@@ -104,20 +106,41 @@ function chipLabel(label: string, selected: string[], format?: (v: string) => st
   return `${label}: ${first}${selected.length > 1 ? ` +${selected.length - 1}` : ""}`;
 }
 
-function ChipButton({ active, label, onToggle, onClear }: { active: boolean; label: string; onToggle: () => void; onClear: () => void }) {
+function ChipButton({
+  active,
+  label,
+  onToggle,
+  onClear,
+}: {
+  active: boolean;
+  label: string;
+  onToggle: () => void;
+  onClear: () => void;
+}) {
   return (
     <div
       className={clsx(
         "inline-flex h-8 items-center rounded-md text-[12px] font-medium transition-colors duration-150",
-        active ? "border border-accent-line bg-accent-soft text-accent-ink" : "border border-dashed border-faint bg-raised text-ink-2 hover:bg-hover",
+        active
+          ? "border border-accent-line bg-accent-soft text-accent-ink"
+          : "border border-dashed border-faint bg-raised text-ink-2 hover:bg-hover",
       )}
     >
-      <button type="button" onClick={onToggle} className="inline-flex h-full max-w-56 items-center gap-1.5 truncate pr-2.5 pl-2.5">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="inline-flex h-full max-w-56 items-center gap-1.5 truncate pr-2.5 pl-2.5"
+      >
         {!active && <Plus className="size-3.5 text-faint" />}
         <span className="truncate">{label}</span>
       </button>
       {active && (
-        <button type="button" aria-label={`Remove ${label}`} onClick={onClear} className="grid h-full place-items-center pr-2 hover:text-ink">
+        <button
+          type="button"
+          aria-label={`Remove ${label}`}
+          onClick={onClear}
+          className="grid h-full place-items-center pr-2 hover:text-ink"
+        >
           <X className="size-3.5" />
         </button>
       )}
@@ -146,13 +169,21 @@ function FacetChip({
     const q = query.trim().toLowerCase();
     return options.filter((o) => o.key && (!q || o.key.toLowerCase().includes(q))).slice(0, 200);
   }, [options, query]);
-  const toggle = (key: string) => onChange(sel.has(key.toLowerCase()) ? selected.filter((s) => s.toLowerCase() !== key.toLowerCase()) : [...selected, key]);
+  const toggle = (key: string) =>
+    onChange(
+      sel.has(key.toLowerCase()) ? selected.filter((s) => s.toLowerCase() !== key.toLowerCase()) : [...selected, key],
+    );
 
   return (
     <Popover
       width={320}
       trigger={({ toggle: open }) => (
-        <ChipButton active={selected.length > 0} label={chipLabel(label, selected, format)} onToggle={open} onClear={() => onChange([])} />
+        <ChipButton
+          active={selected.length > 0}
+          label={chipLabel(label, selected, format)}
+          onToggle={open}
+          onClear={() => onChange([])}
+        />
       )}
     >
       {() => (
@@ -184,7 +215,12 @@ function FacetChip({
                     title={o.key}
                     className="flex h-7 w-full items-center gap-2 rounded px-2 text-left text-[12px] hover:bg-hover"
                   >
-                    <span className={clsx("grid size-3.5 shrink-0 place-items-center rounded-[3px] border", on ? "border-accent bg-accent text-bg" : "border-faint")}>
+                    <span
+                      className={clsx(
+                        "grid size-3.5 shrink-0 place-items-center rounded-[3px] border",
+                        on ? "border-accent bg-accent text-bg" : "border-faint",
+                      )}
+                    >
                       {on && <Check className="size-2.5" strokeWidth={3} />}
                     </span>
                     <span className="truncate">{format ? format(o.key) : o.key}</span>
@@ -206,7 +242,14 @@ function TagChip({ selected, onChange }: { selected: string[]; onChange: (v: str
   return (
     <Popover
       width={300}
-      trigger={({ toggle }) => <ChipButton active={selected.length > 0} label={chipLabel("Tag", selected)} onToggle={toggle} onClear={() => onChange([])} />}
+      trigger={({ toggle }) => (
+        <ChipButton
+          active={selected.length > 0}
+          label={chipLabel("Tag", selected)}
+          onToggle={toggle}
+          onClear={() => onChange([])}
+        />
+      )}
     >
       {() => (
         <form
@@ -229,9 +272,17 @@ function TagChip({ selected, onChange }: { selected: string[]; onChange: (v: str
           {selected.length > 0 && (
             <ul className="mt-2 flex flex-wrap gap-1">
               {selected.map((t) => (
-                <li key={t} className="inline-flex h-6 items-center gap-1 rounded bg-hover pr-1 pl-2 font-mono text-[11px]">
+                <li
+                  key={t}
+                  className="inline-flex h-6 items-center gap-1 rounded bg-hover pr-1 pl-2 font-mono text-[11px]"
+                >
                   {t}
-                  <button type="button" aria-label={`Remove ${t}`} onClick={() => onChange(selected.filter((s) => s !== t))} className="text-faint hover:text-ink">
+                  <button
+                    type="button"
+                    aria-label={`Remove ${t}`}
+                    onClick={() => onChange(selected.filter((s) => s !== t))}
+                    className="text-faint hover:text-ink"
+                  >
                     <X className="size-3" />
                   </button>
                 </li>
@@ -270,10 +321,14 @@ function ExportMenu({ scope, filters, sort }: { scope: Scope; filters: ResourceF
               className="flex flex-col rounded px-2.5 py-1.5 hover:bg-hover"
             >
               <span className="text-[12px] font-medium">{f.toUpperCase()}</span>
-              <span className="text-[11px] text-muted">{f === "csv" ? "Spreadsheet-friendly, tags flattened" : "One object per resource"}</span>
+              <span className="text-[11px] text-muted">
+                {f === "csv" ? "Spreadsheet-friendly, tags flattened" : "One object per resource"}
+              </span>
             </a>
           ))}
-          <p className="border-t border-line px-2.5 pt-1.5 pb-1 text-[11px] text-muted">Exports every resource matching the current filters.</p>
+          <p className="border-t border-line px-2.5 pt-1.5 pb-1 text-[11px] text-muted">
+            Exports every resource matching the current filters.
+          </p>
         </div>
       )}
     </Popover>

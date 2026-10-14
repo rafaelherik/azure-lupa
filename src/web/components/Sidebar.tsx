@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { AlertTriangle, ChevronRight, Copy, RefreshCw, Search, TerminalSquare } from "lucide-react";
 import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import logoMark from "../../../assets/icon/icon-gradient.svg";
 import type { Subscription, Tenant } from "../../shared/types";
 import { RequestError } from "../lib/api";
 import { nf } from "../lib/format";
@@ -45,7 +46,10 @@ function Chevron({ open, onClick, className }: { open: boolean; onClick: () => v
       aria-label={open ? "Collapse" : "Expand"}
       aria-expanded={open}
       onClick={onClick}
-      className={clsx("absolute top-1.5 z-10 grid size-4 place-items-center rounded text-faint hover:text-ink", className)}
+      className={clsx(
+        "absolute top-1.5 z-10 grid size-4 place-items-center rounded text-faint hover:text-ink",
+        className,
+      )}
     >
       <ChevronRight className={clsx("size-3.5 transition-transform duration-150", open && "rotate-90")} />
     </button>
@@ -67,17 +71,19 @@ export function Sidebar() {
   const list = useMemo(() => {
     const f = filter.trim().toLowerCase();
     const all = tenants.data?.data ?? [];
-    return f ? all.filter((t) => `${t.displayName} ${t.defaultDomain ?? ""} ${t.tenantId}`.toLowerCase().includes(f)) : all;
+    return f
+      ? all.filter((t) => `${t.displayName} ${t.defaultDomain ?? ""} ${t.tenantId}`.toLowerCase().includes(f))
+      : all;
   }, [tenants.data, filter]);
 
   return (
     <aside className="flex h-full min-h-0 flex-col border-r border-line bg-panel">
       <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-line px-4">
-        <span className="grid size-6 place-items-center rounded-md bg-ink text-bg">
-          <Search className="size-3.5" strokeWidth={2.5} />
-        </span>
+        <img src={logoMark} alt="" className="size-6 shrink-0" />
         <span className="text-[14px] font-semibold">azure-lupa</span>
-        <span className="ml-auto rounded border border-line bg-raised px-1.5 text-[11px] font-medium text-muted">read-only</span>
+        <span className="ml-auto rounded border border-line bg-raised px-1.5 text-[11px] font-medium text-muted">
+          read-only
+        </span>
       </div>
 
       <div className="px-3 pt-3">
@@ -109,7 +115,9 @@ export function Sidebar() {
         {list.map((t) => (
           <TenantNode key={t.tenantId} tenant={t} open={expanded.has(t.tenantId)} toggle={toggle} expanded={expanded} />
         ))}
-        {tenants.data && list.length === 0 && <p className="px-2 pt-2 text-[12px] text-muted">No tenant matches “{filter}”.</p>}
+        {tenants.data && list.length === 0 && (
+          <p className="px-2 pt-2 text-[12px] text-muted">No tenant matches “{filter}”.</p>
+        )}
       </nav>
 
       <div className="flex h-10 shrink-0 items-center justify-between border-t border-line px-4 text-[12px] text-muted">
@@ -162,7 +170,10 @@ function TenantNode({
         className={clsx(rowBase, "pl-1.5 font-semibold", isScope ? "text-ink" : "text-ink-2")}
         title={`${tenant.displayName}\n${tenant.defaultDomain ?? ""}\n${tenant.tenantId}`}
       >
-        <ChevronRight aria-hidden className={clsx("size-3.5 shrink-0 text-faint transition-transform duration-150", open && "rotate-90")} />
+        <ChevronRight
+          aria-hidden
+          className={clsx("size-3.5 shrink-0 text-faint transition-transform duration-150", open && "rotate-90")}
+        />
         <span className="truncate">{tenant.displayName}</span>
         {needsLogin && <span className="ml-auto shrink-0 text-[11px] font-medium text-warn">Needs sign-in</span>}
         {!needsLogin && subs.data && (
@@ -185,7 +196,11 @@ function TenantNode({
           )}
           {subs.data && subs.data.data.length > 1 && (
             <div className="flex items-center gap-1 py-0.5 pl-6">
-              <button type="button" onClick={selectAll} className="rounded px-1 text-[12px] text-accent hover:underline">
+              <button
+                type="button"
+                onClick={selectAll}
+                className="rounded px-1 text-[12px] text-accent hover:underline"
+              >
                 Select all {subs.data.data.length}
               </button>
               <span className="flex-1" />
@@ -207,7 +222,9 @@ function SignInCard({ tenantId }: { tenantId: string }) {
   const cmd = `az login --tenant ${tenantId}`;
   return (
     <div className="my-1 mr-1 ml-6 rounded-md border border-dashed border-faint bg-raised p-2.5">
-      <p className="mb-1.5 text-[12px] text-muted">This tenant needs its own sign-in. Run in your terminal, then refresh:</p>
+      <p className="mb-1.5 text-[12px] text-muted">
+        This tenant needs its own sign-in. Run in your terminal, then refresh:
+      </p>
       <button
         type="button"
         onClick={() => copy(cmd, "Command copied")}
@@ -222,7 +239,15 @@ function SignInCard({ tenantId }: { tenantId: string }) {
   );
 }
 
-function SubscriptionNode({ sub, open, toggle }: { sub: Subscription; open: boolean; toggle: (id: string, v?: boolean) => void }) {
+function SubscriptionNode({
+  sub,
+  open,
+  toggle,
+}: {
+  sub: Subscription;
+  open: boolean;
+  toggle: (id: string, v?: boolean) => void;
+}) {
   const [state, update] = useViewState();
   const rgs = useResourceGroups(sub.tenantId, sub.subscriptionId, open);
   const scopeSummary = useSummary({ tenantId: state.tenantId, subscriptionIds: state.subscriptionIds });
@@ -232,46 +257,56 @@ function SubscriptionNode({ sub, open, toggle }: { sub: Subscription; open: bool
   const disabled = sub.state !== "Enabled";
   // Known counts only: from the cached scope summary, or the sum of loaded resource groups.
   const count = inScope
-    ? scopeSummary.data?.data.bySubscription.find((b) => b.key.toLowerCase() === sub.subscriptionId.toLowerCase())?.count
+    ? scopeSummary.data?.data.bySubscription.find((b) => b.key.toLowerCase() === sub.subscriptionId.toLowerCase())
+        ?.count
     : rgs.data?.data.reduce((n, g) => n + (g.resourceCount ?? 0), 0);
 
   const select = (e: MouseEvent) => {
     const additive = (e.metaKey || e.ctrlKey) && state.tenantId === sub.tenantId;
     if (additive) {
       const has = state.subscriptionIds.includes(sub.subscriptionId);
-      const next = has ? state.subscriptionIds.filter((s) => s !== sub.subscriptionId) : [...state.subscriptionIds, sub.subscriptionId];
-      if (next.length) update({ subscriptionIds: next, filters: { ...state.filters, resourceGroups: [] }, selectedId: undefined });
+      const next = has
+        ? state.subscriptionIds.filter((s) => s !== sub.subscriptionId)
+        : [...state.subscriptionIds, sub.subscriptionId];
+      if (next.length)
+        update({ subscriptionIds: next, filters: { ...state.filters, resourceGroups: [] }, selectedId: undefined });
       return;
     }
     update({ tenantId: sub.tenantId, subscriptionIds: [sub.subscriptionId], filters: {}, selectedId: undefined });
   };
 
-  const activeRgs = new Set((inScope ? state.filters.resourceGroups ?? [] : []).map((r) => r.toLowerCase()));
+  const activeRgs = new Set((inScope ? (state.filters.resourceGroups ?? []) : []).map((r) => r.toLowerCase()));
 
   return (
     <div>
       <div className="relative">
-      <Chevron open={open} onClick={() => toggle(sub.subscriptionId)} className="left-5" />
-      <button
-        type="button"
-        onClick={select}
-        aria-current={inScope ? "true" : undefined}
-        title={`${sub.displayName}\n${sub.subscriptionId}${disabled ? `\n${sub.state}` : ""}`}
-        className={clsx(
-          rowBase,
-          "h-auto min-h-7 py-1 pl-10 leading-[18px]",
-          inScope ? "bg-raised font-medium text-ink shadow-[0_0_0_1px_var(--line)]" : "text-ink-2",
-          disabled && "text-faint",
-        )}
-      >
-        <span className="min-w-0 break-words">{sub.displayName}</span>
-        {holdsSelection && <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-accent" />}
-        {disabled ? (
-          <span className="ml-auto shrink-0 text-[11px] text-faint">{sub.state}</span>
-        ) : (
-          count !== undefined && <span className={clsx("ml-auto shrink-0 text-[11px] font-normal", inScope ? "text-accent-ink" : "text-faint")}>{nf.format(count)}</span>
-        )}
-      </button>
+        <Chevron open={open} onClick={() => toggle(sub.subscriptionId)} className="left-5" />
+        <button
+          type="button"
+          onClick={select}
+          aria-current={inScope ? "true" : undefined}
+          title={`${sub.displayName}\n${sub.subscriptionId}${disabled ? `\n${sub.state}` : ""}`}
+          className={clsx(
+            rowBase,
+            "h-auto min-h-7 py-1 pl-10 leading-[18px]",
+            inScope ? "bg-raised font-medium text-ink shadow-[0_0_0_1px_var(--line)]" : "text-ink-2",
+            disabled && "text-faint",
+          )}
+        >
+          <span className="min-w-0 break-words">{sub.displayName}</span>
+          {holdsSelection && <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-accent" />}
+          {disabled ? (
+            <span className="ml-auto shrink-0 text-[11px] text-faint">{sub.state}</span>
+          ) : (
+            count !== undefined && (
+              <span
+                className={clsx("ml-auto shrink-0 text-[11px] font-normal", inScope ? "text-accent-ink" : "text-faint")}
+              >
+                {nf.format(count)}
+              </span>
+            )
+          )}
+        </button>
       </div>
       {open && (
         <div>
@@ -299,7 +334,11 @@ function SubscriptionNode({ sub, open, toggle }: { sub: Subscription; open: bool
                   })
                 }
                 title={`${rg.name} · ${rg.location}`}
-                className={clsx(rowBase, "pl-14 text-[12px]", active ? "bg-accent-soft font-medium text-accent-ink" : "text-muted")}
+                className={clsx(
+                  rowBase,
+                  "pl-14 text-[12px]",
+                  active ? "bg-accent-soft font-medium text-accent-ink" : "text-muted",
+                )}
               >
                 <MiddleTruncate text={rg.name} tail={10} />
                 {holds && <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-accent" />}

@@ -1,6 +1,6 @@
 ---
 name: azure-lupa
-description: A calm, dense, keyboard-first Azure inventory explorer in the category standard.
+description: A calm, dense Azure inventory explorer in the category standard.
 colors:
   bg: "#ffffff"
   panel: "#f8fafc"
@@ -225,7 +225,7 @@ components:
 
 azure-lupa is the category standard for cloud inventory, built to modern Azure Portal (Fluent) craft and then made faster: one table, one details drawer, no blade stacking. The screen is white ground and slate ink, divided by 1px hairlines, with one blue reserved for what the engineer is acting on. Nothing decorates. Density is high (30px rows, 13px body) but every row stays legible, and every machine string (types, IDs, API versions, CLI commands) is set in monospace so it reads as data.
 
-The shell is three fixed regions: a 272px slate-50 sidebar tree (tenants, subscriptions, resource groups with counts), a main column (56px tab bar with breadcrumb and cache age, toolbar of search and filter chips, sticky-header table, totals footer), and an optional 460px details drawer at the right. The dark theme mirrors the light one on slate-950 rather than reinterpreting it. Keyboard hints (`kbd`) are part of the visual vocabulary, not an afterthought.
+The shell is three fixed regions: a 272px slate-50 sidebar tree (tenants, subscriptions, resource groups with counts), a main column (56px tab bar with breadcrumb and cache age, toolbar of search and filter chips, sticky-header table, totals footer), and an optional 460px details drawer at the right. The dark theme mirrors the light one on slate-950 rather than reinterpreting it.
 
 The world refuses novelty theming: no brand illustration, no gradients, no display type, no colored side stripes. Depth comes from tone and hairlines; shadows exist only on things that float.
 
@@ -235,7 +235,7 @@ The world refuses novelty theming: no brand illustration, no gradients, no displ
 - System UI sans for all text; ui-monospace for machine strings; tabular numerals everywhere.
 - 1px slate hairlines as the only structure; overlay shadows only on floating layers.
 - 6px controls, 8px floating surfaces, 4px tags.
-- Dense, keyboard-first: 30px rows, 28 to 32px controls, visible `kbd` hints.
+- Dense: 30px rows, 28 to 32px controls.
 
 ## Colors
 
@@ -245,7 +245,7 @@ A cool slate neutral scale with a single Fluent-adjacent blue; status colors app
 - **Portal Blue** (accent): the action and selection color. Focus outlines, text actions ("Refresh", "Select all N", "Show all"), the resource-group link in the details panel, the caret, checked checkboxes in facet menus, the in-scope activity dot, and Dashboard bars (each bar is a drill-in action, shown at 80% opacity, full on hover).
 - **Deep Portal Blue** (accent-ink): blue that reads as text on a soft-blue fill: the selected row's resource name, active filter chips, the filtered resource group in the tree, numbers and booleans in the property tree and JSON view.
 - **Selection Wash** (accent-soft): the fill of selected rows, active filter chips, and the filtered resource-group row.
-- **Selection Edge** (accent-line): the border of active chips, the keyboard-cursor inset ring on table rows, and text selection.
+- **Selection Edge** (accent-line): the border of active chips and text selection.
 - **Focus Halo** (ring): the 3px focus ring around text inputs.
 
 ### Neutral
@@ -298,7 +298,7 @@ Full-height app shell, no page scroll; each region scrolls on its own.
 - **Sidebar:** 272px at 1024px and up, static. Below 1024px it becomes a 288px off-canvas drawer that slides in over a 20% ink scrim (200ms transform) with the overlay shadow.
 - **Top bar:** 56px, bottom hairline. Tabs (Resources, Dashboard) with 20px gaps, then the tenant / scope breadcrumb (from 768px), a flexible gap, cache age with a status dot and a "Refresh" text action, and the theme toggle (system, light, dark).
 - **Toolbar:** at least 56px, wraps; 320px search (full width below 640px), filter chips, "Clear filters", Export pushed right. 8px gaps.
-- **Table:** sticky 36px header, 30px rows, 40px totals footer with keyboard hints from 1024px. Minimum grid width 960px; 720px with the details panel open.
+- **Table:** sticky 36px header, 30px rows, 40px totals footer. Minimum grid width 960px; 720px with the details panel open.
 - **Details drawer:** 460px inline at 1024px and up; below that it covers the table area full width.
 - **Dashboard:** max 1400px, 20px top padding, cards in two columns from 1280px (type list left, location / subscription / resource group stacked right).
 - **Horizontal padding:** 16px, 24px from 768px. The first table column aligns to that padding.
@@ -309,7 +309,7 @@ Full-height app shell, no page scroll; each region scrolls on its own.
 
 ## Elevation & Depth
 
-Flat by default. Depth is tonal (paper ground, slate-50 chrome, raised white controls) and drawn with 1px hairlines. Shadows appear only on layers that float above the page: popovers, the mobile sidebar drawer, and the toast. A 1px ring drawn with box-shadow is treated as a border, not elevation (the in-scope subscription row, the keyboard cursor).
+Flat by default. Depth is tonal (paper ground, slate-50 chrome, raised white controls) and drawn with 1px hairlines. Shadows appear only on layers that float above the page: popovers, the mobile sidebar drawer, and the toast. A 1px ring drawn with box-shadow is treated as a border, not elevation (the in-scope subscription row).
 
 ### Shadow Vocabulary
 - **Overlay** (`box-shadow: 0 8px 24px -6px rgb(15 23 42 / 0.16), 0 2px 6px -2px rgb(15 23 42 / 0.08)`; dark `0 8px 24px -6px rgb(0 0 0 / 0.5), 0 2px 6px -2px rgb(0 0 0 / 0.4)`): popovers and menus, the off-canvas sidebar, the toast.
@@ -358,7 +358,6 @@ Text tabs with a 2px ink underline on the active item; inactive muted, ink on ho
 - 30px rows, soft-hairline dividers, ink-2 text; the name cell has a 14px type icon in muted and a medium ink name.
 - Type cell in mono: the type in ink-2, then the provider in faint.
 - **Selected row:** accent-soft fill plus an accent-ink name. No side stripe, no border change.
-- **Keyboard cursor:** a 1px inset accent-line ring, shown only after the keyboard is used.
 - Empty values are a faint em dash. Tags show the first pair as a tag pill plus a "+N" outlined counter.
 - Loading is 14 shimmer skeleton rows; empty and error states center a 24px icon, a 14px/500 heading, a muted explanation and a default button.
 
@@ -393,7 +392,7 @@ Color changes 150ms (100ms on tree rows); chevrons rotate 150ms; sidebar drawer 
 - **Do** drop low-priority columns, stack rows below 640px, or middle-truncate long names before letting content clip at an edge.
 - **Do** separate regions with 1px hairlines and tone (paper, slate-50, raised) rather than shadows.
 - **Do** keep controls at 28px or 32px and rows at 30px; keep the 4px spacing grid.
-- **Do** show keyboard affordances with `kbd` keys (11px mono, hairline border, 4px radius).
+- **Do** set modifier keys in `kbd` (for example `⌘` / `Ctrl`) (11px mono, hairline border, 4px radius).
 - **Do** use dashed faint borders only for things the user can add or must do (unapplied filters, sign-in needed).
 
 ### Don't:

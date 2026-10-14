@@ -91,7 +91,8 @@ export function useSummary(scope: Scope, filters: ResourceFilters = {}) {
   return useQuery({
     queryKey: ["summary", scope.tenantId, scope.subscriptionIds, filters, freshAfter],
     enabled: Boolean(scope.tenantId && scope.subscriptionIds.length),
-    queryFn: () => api.summary({ tenantId: scope.tenantId!, subscriptionIds: scope.subscriptionIds, filters, freshAfter }),
+    queryFn: () =>
+      api.summary({ tenantId: scope.tenantId!, subscriptionIds: scope.subscriptionIds, filters, freshAfter }),
     placeholderData: keepPreviousData,
     ...session,
   });

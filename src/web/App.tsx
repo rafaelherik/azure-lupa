@@ -30,7 +30,10 @@ export function App() {
   const [theme, setTheme] = useTheme();
   const [navOpen, setNavOpen] = useState(false);
   const now = useNow();
-  const scope = useMemo(() => ({ tenantId: state.tenantId, subscriptionIds: state.subscriptionIds }), [state.tenantId, state.subscriptionIds]);
+  const scope = useMemo(
+    () => ({ tenantId: state.tenantId, subscriptionIds: state.subscriptionIds }),
+    [state.tenantId, state.subscriptionIds],
+  );
   const hasScope = Boolean(scope.tenantId && scope.subscriptionIds.length);
   const subs = useSubscriptions(state.tenantId ?? "", Boolean(state.tenantId));
   const tenants = useTenants();
@@ -100,9 +103,17 @@ export function App() {
           <span className="flex-1" />
           {hasScope && cached && (
             <span className="flex items-center gap-2 text-[12px] whitespace-nowrap text-muted">
-              <span aria-hidden className={clsx("size-1.5 rounded-full", scopeSummary.isFetching ? "animate-pulse bg-accent" : "bg-faint")} />
+              <span
+                aria-hidden
+                className={clsx(
+                  "size-1.5 rounded-full",
+                  scopeSummary.isFetching ? "animate-pulse bg-accent" : "bg-faint",
+                )}
+              />
               <span className="hidden sm:inline">
-                {scopeSummary.isFetching ? "Loading from Azure…" : `${cached.fromCache ? "Cached" : "Updated"} ${timeAgo(cached.cachedAt, now)}`}
+                {scopeSummary.isFetching
+                  ? "Loading from Azure…"
+                  : `${cached.fromCache ? "Cached" : "Updated"} ${timeAgo(cached.cachedAt, now)}`}
               </span>
               <span className="hidden text-faint sm:inline">·</span>
               <button
@@ -131,7 +142,12 @@ export function App() {
               )}
               {state.selectedId && state.tenantId && (
                 <div className="absolute inset-0 z-10 flex lg:static lg:z-auto">
-                  <DetailsPanel key={state.selectedId} tenantId={state.tenantId} id={state.selectedId} subscriptionNames={subscriptionNames} />
+                  <DetailsPanel
+                    key={state.selectedId}
+                    tenantId={state.tenantId}
+                    id={state.selectedId}
+                    subscriptionNames={subscriptionNames}
+                  />
                 </div>
               )}
             </div>
@@ -151,17 +167,19 @@ function Welcome({ onOpenNav }: { onOpenNav: () => void }) {
       <div className="max-w-md">
         <h1 className="text-[18px] font-semibold">Pick a subscription to start</h1>
         <p className="mt-2 text-[13px] text-muted">
-          Open a tenant in the sidebar and select a subscription. Hold <kbd>⌘</kbd> or <kbd>Ctrl</kbd> to add more, or use “Select all”.
-          Nothing loads until you ask for it, and results are cached on this machine so the next visit is instant.
+          Open a tenant in the sidebar and select a subscription. Hold <kbd>⌘</kbd> or <kbd>Ctrl</kbd> to add more, or
+          use “Select all”. Nothing loads until you ask for it, and results are cached on this machine so the next visit
+          is instant.
         </p>
         <ul className="mt-4 space-y-1.5 text-[13px] text-ink-2">
-          <li>
-            <kbd>/</kbd> search · <kbd>j</kbd> <kbd>k</kbd> move through rows · <kbd>↵</kbd> open details · <kbd>esc</kbd> close
-          </li>
           <li>Select a resource group to filter, or a bar on the Dashboard to drill in.</li>
           <li>Export the current view as CSV or JSON from the toolbar.</li>
         </ul>
-        <button type="button" onClick={onOpenNav} className="mt-5 text-[13px] font-medium text-accent hover:underline lg:hidden">
+        <button
+          type="button"
+          onClick={onOpenNav}
+          className="mt-5 text-[13px] font-medium text-accent hover:underline lg:hidden"
+        >
           Show tenants
         </button>
       </div>

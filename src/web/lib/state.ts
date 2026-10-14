@@ -74,14 +74,17 @@ const snapshot = () => {
 
 export function useViewState() {
   const state = useSyncExternalStore(subscribe, snapshot);
-  const update = useCallback((patch: Partial<ViewState> | ((s: ViewState) => Partial<ViewState>), opts: { replace?: boolean } = {}) => {
-    const current = snapshot();
-    const next = { ...current, ...(typeof patch === "function" ? patch(current) : patch) };
-    const url = location.pathname + serialize(next);
-    if (opts.replace) history.replaceState(null, "", url);
-    else history.pushState(null, "", url);
-    listeners.forEach((fn) => fn());
-  }, []);
+  const update = useCallback(
+    (patch: Partial<ViewState> | ((s: ViewState) => Partial<ViewState>), opts: { replace?: boolean } = {}) => {
+      const current = snapshot();
+      const next = { ...current, ...(typeof patch === "function" ? patch(current) : patch) };
+      const url = location.pathname + serialize(next);
+      if (opts.replace) history.replaceState(null, "", url);
+      else history.pushState(null, "", url);
+      listeners.forEach((fn) => fn());
+    },
+    [],
+  );
   return [state, update] as const;
 }
 

@@ -20,7 +20,7 @@ A local, read-only Azure inventory explorer that reuses the user's `az login` se
 
 ## Positioning
 
-Speed and keyboard-first operation. Data loads lazily per subscription and is cached locally, so navigation feels instant; core actions are reachable from the keyboard.
+Speed. Data loads lazily per subscription and is cached locally, so navigation feels instant.
 
 ## Operating Context
 
@@ -36,9 +36,8 @@ Runs on the engineer's desktop on localhost, alongside a terminal where they alr
 ## Product Principles
 
 1. Fast first: never load more than the user asked to see; show cached data immediately.
-2. Keyboard reachable: search, navigation and closing panels work without the mouse.
-3. Dense but legible: many rows per screen, full IDs one click away.
-4. Never fail silently: auth and throttling problems explain the exact next command to run.
+2. Dense but legible: many rows per screen, full IDs one click away.
+3. Never fail silently: auth and throttling problems explain the exact next command to run.
 
 ## Brand Commitments
 

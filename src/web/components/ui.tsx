@@ -26,7 +26,11 @@ export function Button({
   );
 }
 
-export function IconButton({ label, className, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
+export function IconButton({
+  label,
+  className,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
   return (
     <button
       type="button"
@@ -98,7 +102,12 @@ export function Skeleton({ className }: { className?: string }) {
 
 export function Badge({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <span className={clsx("inline-flex h-[18px] items-center rounded px-1.5 text-[11px] font-medium", className ?? "bg-hover text-ink-2")}>
+    <span
+      className={clsx(
+        "inline-flex h-[18px] items-center rounded px-1.5 text-[11px] font-medium",
+        className ?? "bg-hover text-ink-2",
+      )}
+    >
       {children}
     </span>
   );

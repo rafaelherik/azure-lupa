@@ -12,9 +12,18 @@ import { Button, IconButton, Skeleton } from "./ui";
 type Tab = "overview" | "properties" | "json";
 
 const str = (v: unknown) => (typeof v === "string" && v ? v : undefined);
-const obj = (v: unknown) => (v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : undefined);
+const obj = (v: unknown) =>
+  v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : undefined;
 
-export function DetailsPanel({ tenantId, id, subscriptionNames }: { tenantId: string; id: string; subscriptionNames: Map<string, string> }) {
+export function DetailsPanel({
+  tenantId,
+  id,
+  subscriptionNames,
+}: {
+  tenantId: string;
+  id: string;
+  subscriptionNames: Map<string, string>;
+}) {
   const [state, update] = useViewState();
   const [tab, setTab] = useState<Tab>("overview");
   const details = useDetails(tenantId, id);
@@ -117,7 +126,11 @@ export function DetailsPanel({ tenantId, id, subscriptionNames }: { tenantId: st
         )}
         {r && tab === "properties" && (
           <div className="p-3">
-            {obj(r.properties) ? <PropertyTree value={r.properties} depth={0} /> : <p className="p-2 text-[13px] text-muted">This resource has no properties.</p>}
+            {obj(r.properties) ? (
+              <PropertyTree value={r.properties} depth={0} />
+            ) : (
+              <p className="p-2 text-[13px] text-muted">This resource has no properties.</p>
+            )}
           </div>
         )}
         {r && tab === "json" && <JsonView value={r} />}
@@ -126,7 +139,8 @@ export function DetailsPanel({ tenantId, id, subscriptionNames }: { tenantId: st
       {details.data && (
         <footer className="flex h-10 shrink-0 items-center gap-2 border-t border-line bg-panel px-5 text-[12px] text-muted">
           <span>
-            {details.data.fromCache ? "Cached" : "Fetched"} {timeAgo(details.data.cachedAt)} · API {details.data.data.apiVersion}
+            {details.data.fromCache ? "Cached" : "Fetched"} {timeAgo(details.data.cachedAt)} · API{" "}
+            {details.data.data.apiVersion}
           </span>
           <button
             type="button"
@@ -183,7 +197,12 @@ function Overview({
       <h3 className="pt-1 pb-1 text-[12px] font-semibold text-ink">Essentials</h3>
       <dl className="border-b border-line pb-3">
         <Row label="Resource group">
-          <button type="button" className="text-accent hover:underline" onClick={() => onFilterRg(rg)} title="Filter by this resource group">
+          <button
+            type="button"
+            className="text-accent hover:underline"
+            onClick={() => onFilterRg(rg)}
+            title="Filter by this resource group"
+          >
             {rg}
           </button>
         </Row>
@@ -196,27 +215,45 @@ function Overview({
         <Row label="SKU">{sku ? [str(sku.name), str(sku.tier)].filter(Boolean).join(" · ") || <Dash /> : <Dash />}</Row>
         <Row label="Provisioning">
           {state ? (
-            <span className={clsx("inline-flex items-center gap-1.5", state === "Succeeded" ? "text-ink" : state === "Failed" ? "text-danger" : "text-warn")}>
-              <span aria-hidden className={clsx("size-1.5 rounded-full", state === "Succeeded" ? "bg-ok" : state === "Failed" ? "bg-danger" : "bg-warn")} />
+            <span
+              className={clsx(
+                "inline-flex items-center gap-1.5",
+                state === "Succeeded" ? "text-ink" : state === "Failed" ? "text-danger" : "text-warn",
+              )}
+            >
+              <span
+                aria-hidden
+                className={clsx(
+                  "size-1.5 rounded-full",
+                  state === "Succeeded" ? "bg-ok" : state === "Failed" ? "bg-danger" : "bg-warn",
+                )}
+              />
               {state}
             </span>
           ) : (
             <Dash />
           )}
         </Row>
-        <Row label="Identity">{identity ? str(identity.type) ?? <Dash /> : <Dash />}</Row>
+        <Row label="Identity">{identity ? (str(identity.type) ?? <Dash />) : <Dash />}</Row>
         {system?.createdAt !== undefined && (
           <Row label="Created">
             {new Date(String(system.createdAt)).toLocaleString()}
             {str(system.createdBy) && <span className="block text-[12px] text-muted">by {str(system.createdBy)}</span>}
           </Row>
         )}
-        {system?.lastModifiedAt !== undefined && <Row label="Last modified">{new Date(String(system.lastModifiedAt)).toLocaleString()}</Row>}
+        {system?.lastModifiedAt !== undefined && (
+          <Row label="Last modified">{new Date(String(system.lastModifiedAt)).toLocaleString()}</Row>
+        )}
         <Row label="API version">
           <span className="font-mono text-[12px]">{apiVersion}</span>
         </Row>
         <Row label="Resource ID">
-          <button type="button" onClick={() => copy(id, "Resource ID copied")} className="text-left font-mono text-[11px] break-all text-ink-2 hover:text-ink" title="Copy">
+          <button
+            type="button"
+            onClick={() => copy(id, "Resource ID copied")}
+            className="text-left font-mono text-[11px] break-all text-ink-2 hover:text-ink"
+            title="Copy"
+          >
             {id}
           </button>
         </Row>
@@ -255,12 +292,19 @@ function Scalar({ v }: { v: unknown }) {
   if (typeof v === "boolean") return <span className="font-mono text-[12px] text-accent-ink">{String(v)}</span>;
   if (typeof v === "number") return <span className="font-mono text-[12px] text-accent-ink">{v}</span>;
   const s = String(v);
-  return <span className={clsx("break-all", s.startsWith("/subscriptions/") && "font-mono text-[11px]")}>{s || <span className="text-faint">""</span>}</span>;
+  return (
+    <span className={clsx("break-all", s.startsWith("/subscriptions/") && "font-mono text-[11px]")}>
+      {s || <span className="text-faint">""</span>}
+    </span>
+  );
 }
 
 function PropertyTree({ value, depth }: { value: unknown; depth: number }) {
-  const entries = Array.isArray(value) ? value.map((v, i) => [String(i), v] as const) : Object.entries(value as Record<string, unknown>);
-  if (!entries.length) return <span className="px-2 text-[12px] text-faint">{Array.isArray(value) ? "[ ]" : "{ }"}</span>;
+  const entries = Array.isArray(value)
+    ? value.map((v, i) => [String(i), v] as const)
+    : Object.entries(value as Record<string, unknown>);
+  if (!entries.length)
+    return <span className="px-2 text-[12px] text-faint">{Array.isArray(value) ? "[ ]" : "{ }"}</span>;
   return (
     <ul className={clsx(depth > 0 && "ml-3 border-l border-line pl-2")}>
       {entries.map(([k, v]) => (
@@ -285,8 +329,15 @@ function PropertyNode({ k, v, depth }: { k: string; v: unknown; depth: number })
   const size = Array.isArray(v) ? v.length : Object.keys(v as object).length;
   return (
     <li>
-      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex w-full items-center gap-1 rounded px-1 py-1 text-left text-[13px] hover:bg-hover">
-        <ChevronRight className={clsx("size-3.5 shrink-0 text-faint transition-transform duration-150", open && "rotate-90")} />
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-1 rounded px-1 py-1 text-left text-[13px] hover:bg-hover"
+      >
+        <ChevronRight
+          className={clsx("size-3.5 shrink-0 text-faint transition-transform duration-150", open && "rotate-90")}
+        />
         <span className="text-ink">{k}</span>
         <span className="text-[11px] text-faint">{Array.isArray(v) ? `[${size}]` : `{${size}}`}</span>
       </button>
@@ -303,12 +354,16 @@ function JsonView({ value }: { value: unknown }) {
       text
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
-        .replace(/("(?:\\.|[^"\\])*")(\s*:)?|\b(true|false|null)\b|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g, (m, str, colon, lit, num) => {
-          if (str) return colon ? `<span class="text-ink">${str}</span>${colon}` : `<span class="text-ok">${str}</span>`;
-          if (lit) return `<span class="text-accent-ink">${lit}</span>`;
-          if (num) return `<span class="text-accent-ink">${num}</span>`;
-          return m;
-        }),
+        .replace(
+          /("(?:\\.|[^"\\])*")(\s*:)?|\b(true|false|null)\b|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
+          (m, str, colon, lit, num) => {
+            if (str)
+              return colon ? `<span class="text-ink">${str}</span>${colon}` : `<span class="text-ok">${str}</span>`;
+            if (lit) return `<span class="text-accent-ink">${lit}</span>`;
+            if (num) return `<span class="text-accent-ink">${num}</span>`;
+            return m;
+          },
+        ),
     [text],
   );
   return (
@@ -317,7 +372,10 @@ function JsonView({ value }: { value: unknown }) {
         <Copy className="size-3.5" />
         Copy
       </Button>
-      <pre className="overflow-x-auto p-5 font-mono text-[12px] leading-[18px] text-muted" dangerouslySetInnerHTML={{ __html: html }} />
+      <pre
+        className="overflow-x-auto p-5 font-mono text-[12px] leading-[18px] text-muted"
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
     </div>
   );
 }
@@ -326,7 +384,9 @@ function DetailsError({ error, onRetry }: { error: Error; onRetry: () => void })
   const e = error instanceof RequestError ? error : undefined;
   return (
     <div className="p-5">
-      <p className="text-[13px] font-medium text-danger">{e?.status === 403 ? "You do not have read access to this resource" : "Could not load details"}</p>
+      <p className="text-[13px] font-medium text-danger">
+        {e?.status === 403 ? "You do not have read access to this resource" : "Could not load details"}
+      </p>
       <p className="mt-1 text-[13px] text-muted">{error.message}</p>
       {e?.hint && <code className="mt-2 block rounded bg-hover px-2 py-1 font-mono text-[12px]">{e.hint}</code>}
       <Button className="mt-3" onClick={onRetry}>
