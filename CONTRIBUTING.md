@@ -4,7 +4,7 @@ Thanks for helping make Azure inventories easier to navigate. This guide covers 
 
 ## Ways to contribute
 
-- **Report a bug.** Open an issue with what you did, what you expected, what happened, your OS, your Node.js version and the output of `npx azure-lupa --verbose` (remove tenant and subscription IDs first).
+- **Report a bug.** Open an issue with what you did, what you expected, what happened, your OS, your Node.js version and the output of `azure-lupa --verbose` (remove tenant and subscription IDs first).
 - **Suggest a feature.** Open an issue describing the problem you're trying to solve before writing code, so we can agree on the approach.
 - **Improve the docs.** Typos, clearer wording and examples are always welcome.
 - **Send a pull request.** Look for issues labeled `good first issue` or `help wanted`, or one you've discussed.

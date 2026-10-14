@@ -1,35 +1,34 @@
 name: Release
 
-# Runs only when a GitHub release is published (not when drafted).
+# Runs only when a GitHub release is published (not when drafted). The package is attached to the
+# release as an npm tarball instead of being published to the npm registry.
 on:
   release:
     types: [published]
 
 permissions:
-  contents: read
-  id-token: write # npm trusted publishing (OIDC) + provenance
+  contents: write # upload release assets
 
 jobs:
-  publish:
+  package:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          registry-url: https://registry.npmjs.org
-          # No dependency cache in the publish job (cache-poisoning risk).
-      # Trusted publishing needs npm >= 11.5.1
-      - run: npm install -g npm@latest
+          # No dependency cache in the release job (cache-poisoning risk).
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
       - name: Set version from release tag
         run: npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version --allow-same-version
       - run: npm run build
-      - name: Publish to npm
-        run: npm publish --access public --provenance ${{ github.event.release.prerelease && '--tag next' || '' }}
+      - name: Pack
+        run: |
+          npm pack
+          sha256sum azure-lupa-*.tgz > SHA256SUMS
+      - name: Attach to the release
+        run: gh release upload "$GITHUB_REF_NAME" azure-lupa-*.tgz SHA256SUMS --clobber
         env:
-          # Only used until the trusted publisher is configured on npmjs.com;
-          # afterwards OIDC takes precedence and the secret can be deleted.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ github.token }}

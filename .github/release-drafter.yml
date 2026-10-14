@@ -55,4 +55,4 @@ template: |
 
   $CHANGES
 
-  **Install / run:** `npx azure-lupa@$RESOLVED_VERSION`
+  **Install:** download `azure-lupa-$RESOLVED_VERSION.tgz` below, then `npm install -g ./azure-lupa-$RESOLVED_VERSION.tgz` and run `azure-lupa`.

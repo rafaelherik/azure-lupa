@@ -18,7 +18,7 @@
 **azure-lupa** (_lupa_ is Portuguese and Spanish for "magnifying glass") is an open-source explorer for everything you can see in Azure. It runs on your machine, reuses your existing Azure CLI login, and gives you one fast view of your tenants, subscriptions, resource groups and resources.
 
 ```sh
-npx azure-lupa
+azure-lupa
 ```
 
 ## Why azure-lupa?
@@ -32,10 +32,21 @@ If you work across many tenants and subscriptions, for example as a consultant, 
 
 ## Quick start
 
+azure-lupa is distributed as an npm package attached to each [GitHub release](https://github.com/rafaelherik/azure-lupa/releases), not through the npm registry. Install the latest release with the [GitHub CLI](https://cli.github.com):
+
 ```sh
-az login          # if you aren't signed in yet
-npx azure-lupa    # starts a local server and opens your browser
+gh release download --repo rafaelherik/azure-lupa --pattern 'azure-lupa-*.tgz'
+npm install -g ./azure-lupa-*.tgz
 ```
+
+Then run it:
+
+```sh
+az login      # if you aren't signed in yet
+azure-lupa    # starts a local server and opens your browser
+```
+
+To install a specific version, add its tag: `gh release download v0.0.1 --repo rafaelherik/azure-lupa --pattern 'azure-lupa-*.tgz'`. Each release also has a `SHA256SUMS` file for checking the download.
 
 ## Features
 
@@ -107,7 +118,7 @@ With [Task](https://taskfile.dev) installed, `task dev`, `task test`, `task lint
 
 1. Label PRs (`feature`, `fix`, `chore`, `docs`, `breaking`, …), or let the autolabeler do it from the branch name or the conventional PR title.
 2. Each merge to `main` updates a **draft** GitHub release. Its version comes from the labels: `breaking` → major, `feature` → minor, everything else → patch.
-3. When you're ready, review the draft and click **Publish release**. That runs `.github/workflows/release.yml`, which sets `package.json` to the tag's version and publishes to npm with provenance.
+3. When you're ready, review the draft and click **Publish release**. That runs `.github/workflows/release.yml`, which sets `package.json` to the tag's version, builds the package with `npm pack` and attaches `azure-lupa-<version>.tgz` and `SHA256SUMS` to the release. Nothing is published to the npm registry.
 
 ## License
 
