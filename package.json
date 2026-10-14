@@ -2,6 +2,14 @@
   "name": "azure-lupa",
   "version": "0.1.0",
   "description": "Local Azure inventory explorer using your Azure CLI login",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rafaelherik/azure-lupa.git"
+  },
+  "homepage": "https://github.com/rafaelherik/azure-lupa#readme",
+  "bugs": {
+    "url": "https://github.com/rafaelherik/azure-lupa/issues"
+  },
   "type": "module",
   "bin": {
     "azure-lupa": "bin/azure-lupa.js"

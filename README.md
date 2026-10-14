@@ -1,5 +1,8 @@
 # azure-lupa
 
+[![CI](https://github.com/rafaelherik/azure-lupa/actions/workflows/ci.yml/badge.svg)](https://github.com/rafaelherik/azure-lupa/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/azure-lupa)](https://www.npmjs.com/package/azure-lupa)
+
 A local, read-only Azure inventory explorer that uses your existing Azure CLI login.
 
 ```sh
@@ -54,3 +57,9 @@ npm run dev      # API on :4517 (token "dev") + Vite on :5173 → open http://lo
 npm test         # unit tests
 npm run build    # type-check, build the web app and the server bundle
 ```
+
+## Releasing
+
+1. Label PRs (`feature`, `fix`, `chore`, `docs`, `breaking`, …), or let the autolabeler do it from the branch name or PR title.
+2. Each merge to `main` updates a **draft** GitHub release. Its version comes from the labels: `breaking` → major, `feature` → minor, everything else → patch.
+3. When you're ready, review the draft and click **Publish release**. That runs `.github/workflows/release.yml`, which sets `package.json` to the tag's version and publishes to npm with provenance.
