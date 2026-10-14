@@ -58,6 +58,8 @@ npm test         # unit tests
 npm run build    # type-check, build the web app and the server bundle
 ```
 
+With [Task](https://taskfile.dev) installed, `task dev`, `task test` and `task build` do the same (and install dependencies first if needed). Run `task` to list all tasks.
+
 ## Releasing
 
 1. Label PRs (`feature`, `fix`, `chore`, `docs`, `breaking`, …), or let the autolabeler do it from the branch name or PR title.
