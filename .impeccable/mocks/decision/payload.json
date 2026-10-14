@@ -1,0 +1,114 @@
+{
+  "title": "Choose the visual world for azure-lupa",
+  "question": "The roll assigned Concourse Signage. Keep it, take an alternate, or re-roll. Layout, navigation and controls stay standard in every option; the world lends type, palette, density and one signature move.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Concourse Signage",
+      "kicker": "THE ROLL",
+      "lineage": "Airport wayfinding programs (Schiphol, Kinneir/Calvert, Frutiger at Charles de Gaulle)",
+      "thesis": "A sprawling estate made walkable: every resource type gets a concourse zone colour and pictogram, and where you are is always stated on a yellow directional sign.",
+      "palette": ["#1b2330", "#f7c600", "#f4f5f2", "#14181f", "#2f6fd6", "#0f8a78", "#c2571a", "#7a4cc9"],
+      "materials": ["enamel sign panels", "humanist signage sans", "zone colour coding", "pictogram tiles"],
+      "viewport": "Dark charcoal rail on the left holds the tenant → subscription → resource-group tree. Across the top of the work area a yellow sign band reads the current location as a directional sign (Tenant › Subscription › RG ›) with the search field set into it. Below: a dense resources table on a pale ground; each row leads with a small square zone tile (Compute blue, Network teal, Storage rust, Data violet) carrying the type pictogram. Right drawer opens details.",
+      "risk": "Zone colours must be curated to ~8 categories; unmapped types fall back to neutral grey, and yellow on a light ground needs a dark text plate to pass contrast.",
+      "raised": [
+        {"from": "challenger-ikeda", "raise": "IDs, counts and timestamps are set in tabular monospace at full density; no grey decoration anywhere, only data and signs."},
+        {"from": "challenger-timetable", "raise": "The table uses one type size; rank is carried by weight, case and the zone tile, never by size."},
+        {"from": "challenger-doujin", "raise": "Every row deep-links to its position in the tree: selecting a resource lights its subscription and RG in the rail."},
+        {"from": "challenger-warm-consumer", "raise": "The yellow appears only where you are or what you can act on; it never decorates."}
+      ],
+      "html": ".impeccable/mocks/decision/assigned.html"
+    },
+    {
+      "id": "model-pick",
+      "label": "Survey Sheet",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "Ordnance Survey / USGS topographic map sheets",
+      "thesis": "The estate as surveyed terrain: subscriptions are map sheets, locations are grid squares, and every resource has a grid reference.",
+      "palette": ["#fbfbf8", "#1c1f24", "#c4127a", "#3a8fc9", "#6fa85a", "#d98a2b"],
+      "materials": ["survey grid hairlines", "map legend keys", "sheet-cover magenta", "condensed cartographic labels"],
+      "viewport": "Magenta header strip like a map cover with the sheet title (subscription). Left: tree. Main: table with a legend-key glyph per type column; a thin index-map strip above shows resource density per region as tinted grid squares, clickable as a location filter.",
+      "risk": "Cartography is the most familiar 'inventory' metaphor; the region grid only earns its place if location filtering is frequent.",
+      "html": ".impeccable/mocks/decision/model-pick.html"
+    },
+    {
+      "id": "challenger-ikeda",
+      "label": "Datamatics Field",
+      "verdict": "competitive",
+      "lineage": "Ryoji Ikeda data installations",
+      "thesis": "Pure black and white data density: the inventory as a field of tabular numerics with a barcode strip of resource counts.",
+      "palette": ["#000000", "#ffffff"],
+      "materials": ["hairline bars", "monospace numerics", "full inversion for selection"],
+      "viewport": "Black ground, white monospace table edge to edge; a hairline barcode strip above encodes counts per type, selecting a bar inverts its rows.",
+      "case": "Holds product clarity (density, scan speed) but loses audience identification: engineers read it as art, not a tool; no colour for state.",
+      "risk": "Without colour, errors and needs-login states depend on inversion alone.",
+      "html": ".impeccable/mocks/decision/challenger-ikeda.html"
+    },
+    {
+      "id": "challenger-timetable",
+      "label": "Timetable Slide Rack",
+      "verdict": "declined",
+      "lineage": "1971 pocket airline timetable on a light table",
+      "palette": ["#d9a520", "#2b3440", "#f2ecd9", "#c8341f"],
+      "materials": ["tinted glass slides", "single type size"],
+      "case": "Raked containers and lateral travel fight a fast-scanning table; loses both axes.",
+      "kept": "One type size in the table; rank by weight and case.",
+      "hero": "https://impeccable.style/worlds/cards/rw-timetable-slide-rack-hero.webp"
+    },
+    {
+      "id": "challenger-doujin",
+      "label": "Convention Circle Catalog",
+      "verdict": "declined",
+      "lineage": "doujin event catalogs",
+      "palette": ["#1a1a1a", "#e9e6df", "#d23c3c"],
+      "materials": ["newsprint", "thumbnail grid", "hall map"],
+      "case": "Resources have no thumbnails; a stamp grid hides names and types.",
+      "kept": "Catalog cell ↔ physical position deep-linking.",
+      "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-doujin-event-catalog-hero.webp"
+    },
+    {
+      "id": "challenger-crouwel",
+      "label": "Crouwel Grid Specimen",
+      "verdict": "declined",
+      "lineage": "Wim Crouwel gridded specimens",
+      "palette": ["#ffffff", "#1a1a1a", "#2a5bd7"],
+      "materials": ["visible construction grid", "monumental letterforms"],
+      "case": "Monumental type wastes the density engineers need; loses both axes.",
+      "kept": "Layout reflows by whole cells.",
+      "hero": "https://impeccable.style/worlds/cards/crouwel-grid-specimen-hero.webp"
+    },
+    {
+      "id": "challenger-warm-consumer",
+      "label": "Warm Consumer Surface",
+      "verdict": "declined",
+      "lineage": "consumer app canon",
+      "palette": ["#f6efe6", "#ffffff", "#ff5a36"],
+      "materials": ["soft cards", "bottom bar"],
+      "case": "Touch-first single column is wrong for a desktop data tool.",
+      "kept": "Accent reserved strictly for actionable elements."
+    },
+    {
+      "id": "challenger-jcard",
+      "label": "Cassette J-card",
+      "verdict": "declined",
+      "lineage": "mixtape inlays",
+      "palette": ["#ffffff", "#2a46a8", "#c8102e"],
+      "materials": ["ballpoint", "lined inlay"],
+      "case": "Hand-lettering undermines trust in exact IDs; loses both axes.",
+      "kept": "Running totals right-aligned tight to the margin."
+    }
+  ],
+  "reroll": {"registers": ["safer", "bolder"]},
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "Azure Portal / Linear-style data app executed cleanly: neutral greys, one blue accent.",
+    "palette": ["#ffffff", "#f8fafc", "#0f172a", "#2563eb"],
+    "materials": ["clean grid", "neutral greys", "shadcn-style components"],
+    "viewport": "Sidebar tree, toolbar with search and filter chips, data table, details sheet.",
+    "risk": "Indistinguishable from every other admin tool by design.",
+    "html": ".impeccable/mocks/decision/canon.html"
+  },
+  "steer": true
+}

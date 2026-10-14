@@ -1,0 +1,865 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-13T17:40:00Z",
+  "title": "Design System: azure-lupa",
+  "extensions": {
+    "colorMeta": {
+      "bg": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "dark-bg": {
+        "role": "neutral",
+        "displayName": "Paper (dark)",
+        "canonical": "#020617",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Slate Mist",
+        "canonical": "#f8fafc",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "dark-panel": {
+        "role": "neutral",
+        "displayName": "Slate Mist (dark)",
+        "canonical": "#0f172a",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "raised": {
+        "role": "neutral",
+        "displayName": "Raised",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "dark-raised": {
+        "role": "neutral",
+        "displayName": "Raised (dark)",
+        "canonical": "#0b1324",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "hover": {
+        "role": "neutral",
+        "displayName": "Hover Wash",
+        "canonical": "#f1f5f9",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "dark-hover": {
+        "role": "neutral",
+        "displayName": "Hover Wash (dark)",
+        "canonical": "#1a2540",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#e2e8f0",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "dark-line": {
+        "role": "neutral",
+        "displayName": "Hairline (dark)",
+        "canonical": "#1e293b",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "line-soft": {
+        "role": "neutral",
+        "displayName": "Soft Hairline",
+        "canonical": "#f1f5f9",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "dark-line-soft": {
+        "role": "neutral",
+        "displayName": "Soft Hairline (dark)",
+        "canonical": "#162033",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Slate Ink",
+        "canonical": "#0f172a",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "dark-ink": {
+        "role": "neutral",
+        "displayName": "Slate Ink (dark)",
+        "canonical": "#e2e8f0",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Slate Ink 2",
+        "canonical": "#334155",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "dark-ink-2": {
+        "role": "neutral",
+        "displayName": "Slate Ink 2 (dark)",
+        "canonical": "#cbd5e1",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Slate",
+        "canonical": "#526077",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "dark-muted": {
+        "role": "neutral",
+        "displayName": "Muted Slate (dark)",
+        "canonical": "#94a3b8",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "faint": {
+        "role": "neutral",
+        "displayName": "Faint Slate",
+        "canonical": "#64748b",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "dark-faint": {
+        "role": "neutral",
+        "displayName": "Faint Slate (dark)",
+        "canonical": "#7c8aa0",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#64748b",
+          "#cbd5e1",
+          "#f1f5f9",
+          "#f8fafc"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Portal Blue",
+        "canonical": "#2563eb",
+        "tonalRamp": [
+          "#172554",
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#60a5fa",
+          "#bfdbfe",
+          "#eff6ff"
+        ]
+      },
+      "dark-accent": {
+        "role": "primary",
+        "displayName": "Portal Blue (dark, lightened for contrast)",
+        "canonical": "#60a5fa",
+        "tonalRamp": [
+          "#172554",
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#60a5fa",
+          "#bfdbfe",
+          "#eff6ff"
+        ]
+      },
+      "accent-ink": {
+        "role": "primary",
+        "displayName": "Deep Portal Blue",
+        "canonical": "#1d4ed8",
+        "tonalRamp": [
+          "#172554",
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#60a5fa",
+          "#bfdbfe",
+          "#eff6ff"
+        ]
+      },
+      "dark-accent-ink": {
+        "role": "primary",
+        "displayName": "Deep Portal Blue (dark)",
+        "canonical": "#93c5fd",
+        "tonalRamp": [
+          "#172554",
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#60a5fa",
+          "#bfdbfe",
+          "#eff6ff"
+        ]
+      },
+      "accent-soft": {
+        "role": "primary",
+        "displayName": "Selection Wash",
+        "canonical": "#eff6ff",
+        "tonalRamp": [
+          "#172554",
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#60a5fa",
+          "#bfdbfe",
+          "#eff6ff"
+        ]
+      },
+      "dark-accent-soft": {
+        "role": "primary",
+        "displayName": "Selection Wash (dark)",
+        "canonical": "#172554",
+        "tonalRamp": [
+          "#172554",
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#60a5fa",
+          "#bfdbfe",
+          "#eff6ff"
+        ]
+      },
+      "accent-line": {
+        "role": "primary",
+        "displayName": "Selection Edge",
+        "canonical": "#bfdbfe",
+        "tonalRamp": [
+          "#172554",
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#60a5fa",
+          "#bfdbfe",
+          "#eff6ff"
+        ]
+      },
+      "dark-accent-line": {
+        "role": "primary",
+        "displayName": "Selection Edge (dark)",
+        "canonical": "#1e3a8a",
+        "tonalRamp": [
+          "#172554",
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#60a5fa",
+          "#bfdbfe",
+          "#eff6ff"
+        ]
+      },
+      "ring": {
+        "role": "primary",
+        "displayName": "Focus Halo",
+        "canonical": "#bfdbfe",
+        "tonalRamp": [
+          "#172554",
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#60a5fa",
+          "#bfdbfe",
+          "#eff6ff"
+        ]
+      },
+      "dark-ring": {
+        "role": "primary",
+        "displayName": "Focus Halo (dark)",
+        "canonical": "#1e40af",
+        "tonalRamp": [
+          "#172554",
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#60a5fa",
+          "#bfdbfe",
+          "#eff6ff"
+        ]
+      },
+      "danger": {
+        "role": "status",
+        "displayName": "Danger",
+        "canonical": "#b91c1c",
+        "tonalRamp": [
+          "#7f1d1d",
+          "#991b1b",
+          "#b91c1c",
+          "#dc2626",
+          "#f87171",
+          "#fca5a5",
+          "#fee2e2",
+          "#fef2f2"
+        ]
+      },
+      "dark-danger": {
+        "role": "status",
+        "displayName": "Danger (dark)",
+        "canonical": "#f87171",
+        "tonalRamp": [
+          "#7f1d1d",
+          "#991b1b",
+          "#b91c1c",
+          "#dc2626",
+          "#f87171",
+          "#fca5a5",
+          "#fee2e2",
+          "#fef2f2"
+        ]
+      },
+      "danger-soft": {
+        "role": "status",
+        "displayName": "Danger Soft",
+        "canonical": "#fef2f2",
+        "tonalRamp": [
+          "#7f1d1d",
+          "#991b1b",
+          "#b91c1c",
+          "#dc2626",
+          "#f87171",
+          "#fca5a5",
+          "#fee2e2",
+          "#fef2f2"
+        ]
+      },
+      "dark-danger-soft": {
+        "role": "status",
+        "displayName": "Danger Soft (dark)",
+        "canonical": "#2a1215",
+        "tonalRamp": [
+          "#7f1d1d",
+          "#991b1b",
+          "#b91c1c",
+          "#dc2626",
+          "#f87171",
+          "#fca5a5",
+          "#fee2e2",
+          "#fef2f2"
+        ]
+      },
+      "warn": {
+        "role": "status",
+        "displayName": "Warn",
+        "canonical": "#b45309",
+        "tonalRamp": [
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#d97706",
+          "#fbbf24",
+          "#fcd34d",
+          "#fef3c7",
+          "#fffbeb"
+        ]
+      },
+      "dark-warn": {
+        "role": "status",
+        "displayName": "Warn (dark)",
+        "canonical": "#fbbf24",
+        "tonalRamp": [
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#d97706",
+          "#fbbf24",
+          "#fcd34d",
+          "#fef3c7",
+          "#fffbeb"
+        ]
+      },
+      "warn-soft": {
+        "role": "status",
+        "displayName": "Warn Soft",
+        "canonical": "#fffbeb",
+        "tonalRamp": [
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#d97706",
+          "#fbbf24",
+          "#fcd34d",
+          "#fef3c7",
+          "#fffbeb"
+        ]
+      },
+      "dark-warn-soft": {
+        "role": "status",
+        "displayName": "Warn Soft (dark)",
+        "canonical": "#2a1f0a",
+        "tonalRamp": [
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#d97706",
+          "#fbbf24",
+          "#fcd34d",
+          "#fef3c7",
+          "#fffbeb"
+        ]
+      },
+      "ok": {
+        "role": "status",
+        "displayName": "OK",
+        "canonical": "#15803d",
+        "tonalRamp": [
+          "#14532d",
+          "#166534",
+          "#15803d",
+          "#16a34a",
+          "#4ade80",
+          "#86efac",
+          "#dcfce7",
+          "#f0fdf4"
+        ]
+      },
+      "dark-ok": {
+        "role": "status",
+        "displayName": "OK (dark)",
+        "canonical": "#4ade80",
+        "tonalRamp": [
+          "#14532d",
+          "#166534",
+          "#15803d",
+          "#16a34a",
+          "#4ade80",
+          "#86efac",
+          "#dcfce7",
+          "#f0fdf4"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Empty-state prompt only."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Resource name in the details drawer."
+      },
+      "section": {
+        "displayName": "Section",
+        "purpose": "Card titles, drawer section headings, tab labels (500)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Table cells, tree rows, detail values; tabular numerals."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Buttons, chips, column headers, footers, breadcrumb."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Counts, tag pills, badges, kbd."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Machine strings: types, IDs, API versions, CLI commands, JSON."
+      }
+    },
+    "shadows": [
+      {
+        "name": "overlay",
+        "value": "0 8px 24px -6px rgb(15 23 42 / 0.16), 0 2px 6px -2px rgb(15 23 42 / 0.08)",
+        "purpose": "Popovers, off-canvas sidebar, toast (light)."
+      },
+      {
+        "name": "overlay-dark",
+        "value": "0 8px 24px -6px rgb(0 0 0 / 0.5), 0 2px 6px -2px rgb(0 0 0 / 0.4)",
+        "purpose": "Same floating layers on the dark ground."
+      },
+      {
+        "name": "ring-border",
+        "value": "0 0 0 1px var(--line)",
+        "purpose": "Border-equivalent ring on the in-scope subscription row; not elevation."
+      },
+      {
+        "name": "cursor-ring",
+        "value": "inset 0 0 0 1px var(--accent-line)",
+        "purpose": "Keyboard cursor on table rows, shown only after keyboard use."
+      },
+      {
+        "name": "focus-halo",
+        "value": "0 0 0 3px var(--ring)",
+        "purpose": "Text input focus, with accent border."
+      }
+    ],
+    "motion": [
+      {
+        "name": "color-transition",
+        "value": "150ms ease",
+        "purpose": "Hover and state color changes on controls, tabs, chips (100ms on tree rows)."
+      },
+      {
+        "name": "chevron-rotate",
+        "value": "150ms",
+        "purpose": "Tree and property-tree disclosure."
+      },
+      {
+        "name": "sidebar-slide",
+        "value": "transform 200ms",
+        "purpose": "Off-canvas sidebar below 1024px."
+      },
+      {
+        "name": "drawer-in",
+        "value": "180ms cubic-bezier(0.16, 1, 0.3, 1); translateX(16px) and opacity 0 to rest",
+        "purpose": "Details drawer entrance."
+      },
+      {
+        "name": "shimmer",
+        "value": "1.2s linear infinite",
+        "purpose": "Skeleton loading. Disabled with drawer-in under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px",
+        "purpose": "Below: table rows stack into a single 52px column; search goes full width."
+      },
+      {
+        "name": "md",
+        "value": "768px",
+        "purpose": "Side padding 16 to 24px; breadcrumb appears."
+      },
+      {
+        "name": "lg",
+        "value": "1024px",
+        "purpose": "Static 272px sidebar; details drawer inline at 460px; footer key hints."
+      },
+      {
+        "name": "xl",
+        "value": "1280px",
+        "purpose": "Dashboard cards in two columns."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Default Button",
+      "kind": "button",
+      "refersTo": "button-default",
+      "description": "Bordered compact action; the standard button (Export, Copy ID, Retry).",
+      "html": "<button class='ds-btn'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='7 10 12 15 17 10'/><line x1='12' x2='12' y1='15' y2='3'/></svg>Export</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--raised); color: var(--ink); font: 500 12px/20px system-ui, sans-serif; cursor: pointer; transition: background-color 150ms; } .ds-btn:hover { background: var(--hover); } .ds-btn:active { background: var(--line); } .ds-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Borderless secondary action, e.g. Clear filters.",
+      "html": "<button class='ds-btn-ghost'>Clear filters</button>",
+      "css": ".ds-btn-ghost { height: 28px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); font: 500 12px/20px system-ui, sans-serif; cursor: pointer; transition: background-color 150ms, color 150ms; } .ds-btn-ghost:hover { background: var(--hover); color: var(--ink); } .ds-btn-ghost:active { background: var(--line); } .ds-btn-ghost:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }"
+    },
+    {
+      "name": "Text Action",
+      "kind": "button",
+      "refersTo": "",
+      "description": "Accent text action; the system's call-to-action form (Refresh, Select all, Show all).",
+      "html": "<button class='ds-text-action'><svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8'/><path d='M21 3v5h-5'/><path d='M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16'/><path d='M8 16H3v5'/></svg>Refresh</button>",
+      "css": ".ds-text-action { display: inline-flex; align-items: center; gap: 4px; border: 0; background: none; padding: 0; color: var(--accent); font: 500 12px/20px system-ui, sans-serif; cursor: pointer; } .ds-text-action:hover { text-decoration: underline; } .ds-text-action:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 4px; }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "320px toolbar search with a / key hint; accent border and ring halo on focus.",
+      "html": "<label class='ds-search'><svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg><input placeholder='Search name, type or resource group'><kbd>/</kbd></label>",
+      "css": ".ds-search { position: relative; display: block; width: 320px; } .ds-search svg { position: absolute; top: 8px; left: 10px; color: var(--faint); pointer-events: none; } .ds-search input { width: 100%; height: 32px; padding: 0 32px; border: 1px solid var(--line); border-radius: 6px; background: var(--raised); color: var(--ink); font: 400 13px/20px system-ui, sans-serif; outline: none; caret-color: var(--accent); } .ds-search input::placeholder { color: var(--faint); } .ds-search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); } .ds-search kbd { position: absolute; top: 8px; right: 8px; font: 500 11px/16px ui-monospace, monospace; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; background: var(--panel); }"
+    },
+    {
+      "name": "Filter Chips",
+      "kind": "chip",
+      "refersTo": "filter-chip",
+      "description": "Dashed when unapplied (add a filter); accent-soft with remove button when applied.",
+      "html": "<div class='ds-chips'><span class='ds-chip ds-chip-on'><button>Type: storageaccounts</button><button aria-label='Remove'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M18 6 6 18'/><path d='m6 6 12 12'/></svg></button></span><span class='ds-chip'><button><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M5 12h14'/><path d='M12 5v14'/></svg>Location</button></span></div>",
+      "css": ".ds-chips { display: flex; gap: 8px; } .ds-chip { display: inline-flex; align-items: center; height: 32px; border: 1px dashed var(--faint); border-radius: 6px; background: var(--raised); color: var(--ink-2); font: 500 12px/20px system-ui, sans-serif; transition: background-color 150ms; } .ds-chip:hover { background: var(--hover); } .ds-chip button { display: inline-flex; align-items: center; gap: 6px; height: 100%; padding: 0 10px; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; } .ds-chip:not(.ds-chip-on) svg { color: var(--faint); } .ds-chip-on { border: 1px solid var(--accent-line); background: var(--accent-soft); color: var(--accent-ink); } .ds-chip-on:hover { background: var(--accent-soft); } .ds-chip-on button + button { padding: 0 8px 0 0; } .ds-chip button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 4px; }"
+    },
+    {
+      "name": "Resource Table",
+      "kind": "custom",
+      "refersTo": "table-row",
+      "description": "Sticky slate-50 header, 30px rows; selection is accent-soft fill plus accent-ink name, no side stripe.",
+      "html": "<div class='ds-table'><div class='ds-tr ds-th'><span>Name</span><span>Type</span><span>Resource group</span></div><div class='ds-tr ds-sel'><span class='ds-name'>rgpcgdpsamplestags08174</span><span class='ds-mono'>storageaccounts <i>storage</i></span><span>rg-pc-gdp-sam…-tags-02-dev</span></div><div class='ds-tr'><span class='ds-name'>stpcgdbidwe02</span><span class='ds-mono'>storageaccounts <i>storage</i></span><span>rg-pc-gdp-bi-dev-weeu-02</span></div></div>",
+      "css": ".ds-table { background: var(--bg); color: var(--ink-2); font: 400 13px/20px system-ui, sans-serif; font-variant-numeric: tabular-nums; } .ds-tr { display: grid; grid-template-columns: 1.3fr 1fr 1.3fr; align-items: center; height: 30px; border-bottom: 1px solid var(--line-soft); } .ds-tr > span { padding: 0 12px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; } .ds-tr:not(.ds-th):not(.ds-sel):hover { background: var(--hover); } .ds-th { height: 36px; background: var(--panel); border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; font-weight: 500; } .ds-name { color: var(--ink); font-weight: 500; } .ds-sel { background: var(--accent-soft); } .ds-sel .ds-name { color: var(--accent-ink); } .ds-mono { font: 12px ui-monospace, monospace; } .ds-mono i { font-style: normal; color: var(--faint); margin-left: 6px; }"
+    },
+    {
+      "name": "Sidebar Tree",
+      "kind": "nav",
+      "refersTo": "tree-row",
+      "description": "Tenant, subscription and resource-group rows; in-scope subscription raised with a hairline ring, filtered group in accent-soft.",
+      "html": "<nav class='ds-tree'><div class='ds-sec'><span>Tenants</span><span>11</span></div><button class='ds-node ds-tenant'><svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='m6 9 6 6 6-6'/></svg>Mars Inc<em>7</em></button><button class='ds-node ds-sub ds-scope'>AZ2 - Hybrid - GDP - Non Prod<em>524</em></button><button class='ds-node ds-rg ds-active'>rg-pc-gdp-sam…-tags-02-dev<em>26</em></button><button class='ds-node ds-rg'>rg-pc-gdp-bi-dev-weeu-02<em>14</em></button></nav>",
+      "css": ".ds-tree { width: 272px; padding: 8px; background: var(--panel); font: 400 13px/20px system-ui, sans-serif; font-variant-numeric: tabular-nums; } .ds-sec { display: flex; justify-content: space-between; padding: 4px 8px; font-size: 11px; color: var(--faint); } .ds-sec span:first-child { color: var(--muted); font-weight: 600; letter-spacing: 0.025em; text-transform: uppercase; } .ds-node { display: flex; align-items: center; gap: 6px; width: 100%; min-height: 28px; padding: 0 8px 0 6px; border: 0; border-radius: 6px; background: none; color: var(--ink-2); font: inherit; text-align: left; cursor: pointer; transition: background-color 100ms; } .ds-node:hover { background: var(--hover); } .ds-node em { margin-left: auto; font-style: normal; font-size: 11px; color: var(--faint); } .ds-node svg { color: var(--faint); } .ds-tenant { font-weight: 600; color: var(--ink); } .ds-sub { padding-left: 40px; } .ds-scope { background: var(--raised); color: var(--ink); font-weight: 500; box-shadow: 0 0 0 1px var(--line); } .ds-scope em { color: var(--accent-ink); } .ds-rg { padding-left: 56px; font-size: 12px; color: var(--muted); } .ds-active { background: var(--accent-soft); color: var(--accent-ink); font-weight: 500; } .ds-active em { color: var(--accent-ink); } .ds-node:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }"
+    },
+    {
+      "name": "Tabs",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "Text tabs with a 2px ink underline on the active item.",
+      "html": "<div class='ds-tabs' role='tablist'><button aria-selected='true'>Resources</button><button>Dashboard</button></div>",
+      "css": ".ds-tabs { display: flex; gap: 20px; height: 56px; border-bottom: 1px solid var(--line); } .ds-tabs button { margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--muted); font: 500 13px/20px system-ui, sans-serif; cursor: pointer; transition: color 150ms; } .ds-tabs button:hover { color: var(--ink); } .ds-tabs button[aria-selected='true'] { border-bottom-color: var(--ink); color: var(--ink); } .ds-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 4px; }"
+    },
+    {
+      "name": "Popover Menu",
+      "kind": "custom",
+      "refersTo": "popover",
+      "description": "Floating 8px surface with the overlay shadow; the only resting-free shadow user.",
+      "html": "<div class='ds-pop'><a href='#'><b>CSV</b><span>Spreadsheet-friendly, tags flattened</span></a><a href='#'><b>JSON</b><span>One object per resource</span></a><p>Exports every resource matching the current filters.</p></div>",
+      "css": ".ds-pop { width: 240px; padding: 4px; border: 1px solid var(--line); border-radius: 8px; background: var(--raised); box-shadow: var(--overlay-shadow); font-family: system-ui, sans-serif; } .ds-pop a { display: flex; flex-direction: column; padding: 6px 10px; border-radius: 4px; color: var(--ink); text-decoration: none; } .ds-pop a:hover { background: var(--hover); } .ds-pop a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; } .ds-pop b { font: 500 12px/20px inherit; } .ds-pop span, .ds-pop p { font-size: 11px; color: var(--muted); } .ds-pop p { margin: 0; padding: 6px 10px 4px; border-top: 1px solid var(--line); }"
+    },
+    {
+      "name": "Tag Pill",
+      "kind": "chip",
+      "refersTo": "tag",
+      "description": "Clickable key=value pill that adds a tag filter.",
+      "html": "<button class='ds-tag'><span>root_mgmt_group</span><i>=</i><b>az2</b></button>",
+      "css": ".ds-tag { display: inline-flex; align-items: center; padding: 0 6px; border: 0; border-radius: 4px; background: var(--hover); font: 400 12px/22px system-ui, sans-serif; cursor: pointer; } .ds-tag:hover { background: var(--line); } .ds-tag span { color: var(--muted); } .ds-tag i { font-style: normal; padding: 0 2px; color: var(--faint); } .ds-tag b { font-weight: 400; color: var(--ink); } .ds-tag:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Console",
+    "overview": "**Creative North Star: \"The Quiet Console\"**\n\nazure-lupa is the category standard for cloud inventory, built to modern Azure Portal (Fluent) craft and then made faster: one table, one details drawer, no blade stacking. The screen is white ground and slate ink, divided by 1px hairlines, with one blue reserved for what the engineer is acting on. Nothing decorates. Density is high (30px rows, 13px body) but every row stays legible, and every machine string (types, IDs, API versions, CLI commands) is set in monospace so it reads as data.\n\nThe shell is three fixed regions: a 272px slate-50 sidebar tree (tenants, subscriptions, resource groups with counts), a main column (56px tab bar with breadcrumb and cache age, toolbar of search and filter chips, sticky-header table, totals footer), and an optional 460px details drawer at the right. The dark theme mirrors the light one on slate-950 rather than reinterpreting it. Keyboard hints (`kbd`) are part of the visual vocabulary, not an afterthought.\n\nThe world refuses novelty theming: no brand illustration, no gradients, no display type, no colored side stripes. Depth comes from tone and hairlines; shadows exist only on things that float.",
+    "keyCharacteristics": [
+      "White ground, slate-50 chrome (sidebar, table header, footers), slate ink.",
+      "One blue accent for selection, focus and actions; a lighter blue (#60a5fa) carries the same role on the dark ground.",
+      "System UI sans for all text; ui-monospace for machine strings; tabular numerals everywhere.",
+      "1px slate hairlines as the only structure; overlay shadows only on floating layers.",
+      "6px controls, 8px floating surfaces, 4px tags.",
+      "Dense, keyboard-first: 30px rows, 28 to 32px controls, visible `kbd` hints."
+    ],
+    "rules": [
+      {
+        "name": "The One Blue Rule",
+        "body": "Blue marks only what is selected, focused, or actionable. Headings, tabs, icons and borders at rest are slate. The active tab underline is ink, not blue.",
+        "section": "colors"
+      },
+      {
+        "name": "The Lighter Blue in the Dark Rule",
+        "body": "On the dark ground the accent is #60a5fa, not #2563eb, so actions and focus keep contrast; accent-ink lightens to #93c5fd and accent-soft deepens to navy (#172554). Never carry the light-theme blue into dark.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mirror Rule",
+        "body": "Dark theme is the same token set re-valued on slate-950; components never branch on theme, they only read semantic tokens.",
+        "section": "colors"
+      },
+      {
+        "name": "The Machine-String Rule",
+        "body": "If Azure or the CLI produced the string (type, ID, API version, command, JSON), it is set in mono. Human names stay in sans.",
+        "section": "typography"
+      },
+      {
+        "name": "The Numbers Line Up Rule",
+        "body": "Tabular numerals are on globally; counts align in every column and tree.",
+        "section": "typography"
+      },
+      {
+        "name": "The Drop, Don't Clip Rule",
+        "body": "When space shrinks, the table sheds information instead of cutting it at an edge: with the details panel open the SKU and Tags columns drop; below 640px each row becomes a 52px stacked single column (name, then type and resource group); long resource-group names are middle-truncated by measurement so both ends stay readable, with the full name in the tooltip.",
+        "section": "layout"
+      },
+      {
+        "name": "The Only Floaters Cast Shadows Rule",
+        "body": "Cards, panels, rows and buttons at rest have no shadow. If it does not float over other content, it does not cast one.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use accent only for selection, focus and actions, and switch to the lighter dark-theme blue (#60a5fa) on the dark ground.",
+      "Do show selection as accent-soft fill with accent-ink text.",
+      "Do set every machine string (types, IDs, API versions, CLI commands, JSON) in mono.",
+      "Do drop low-priority columns, stack rows below 640px, or middle-truncate long names before letting content clip at an edge.",
+      "Do separate regions with 1px hairlines and tone (paper, slate-50, raised) rather than shadows.",
+      "Do keep controls at 28px or 32px and rows at 30px; keep the 4px spacing grid.",
+      "Do show keyboard affordances with `kbd` keys (11px mono, hairline border, 4px radius).",
+      "Do use dashed faint borders only for things the user can add or must do (unapplied filters, sign-in needed)."
+    ],
+    "donts": [
+      "Don't mark selection with a colored side stripe or a thicker border.",
+      "Don't use blue for headings, tab underlines, resting icons or decoration.",
+      "Don't put drop shadows on resting surfaces (cards, panels, rows, buttons); only popovers, the mobile drawer and the toast cast the overlay shadow.",
+      "Don't put white text or glyphs on the accent fill in the dark theme; #60a5fa is too light for white.",
+      "Don't add a display typeface, gradients, illustration or themed decoration; the product is the category standard.",
+      "Don't introduce uppercase eyebrow or kicker labels above headings; the sidebar's tree section header is the only uppercase text.",
+      "Don't clip a column at the details-panel edge; drop it."
+    ]
+  }
+}
