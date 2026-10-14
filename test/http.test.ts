@@ -23,9 +23,11 @@ describe("armFetch", () => {
   });
 
   it("surfaces Azure error messages", async () => {
-    const fetchImpl = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ error: { code: "AuthorizationFailed", message: "nope" } }), { status: 403 }),
-    );
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(
+        new Response(JSON.stringify({ error: { code: "AuthorizationFailed", message: "nope" } }), { status: 403 }),
+      );
     await expect(armFetch({ path: "/y" }, fetchImpl as unknown as typeof fetch)).rejects.toMatchObject({
       status: 403,
       code: "AuthorizationFailed",

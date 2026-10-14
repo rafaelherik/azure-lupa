@@ -16,7 +16,9 @@ export function whereClauses(filters: ResourceFilters = {}, omit: Array<keyof Re
 
   const search = filters.search?.trim();
   if (search && use("search")) {
-    out.push(`| where name contains ${kqlString(search)} or type contains ${kqlString(search)} or resourceGroup contains ${kqlString(search)}`);
+    out.push(
+      `| where name contains ${kqlString(search)} or type contains ${kqlString(search)} or resourceGroup contains ${kqlString(search)}`,
+    );
   }
   if (filters.types?.length && use("types")) out.push(`| where type in~ ${kqlList(filters.types)}`);
   if (filters.locations?.length && use("locations")) out.push(`| where location in~ ${kqlList(filters.locations)}`);
@@ -44,7 +46,10 @@ const SORTABLE: Record<SortField, string> = {
   subscriptionId: "subscriptionId",
 };
 
-export function resourcesQuery(filters: ResourceFilters | undefined, sort?: { field: SortField; dir: "asc" | "desc" }): string {
+export function resourcesQuery(
+  filters: ResourceFilters | undefined,
+  sort?: { field: SortField; dir: "asc" | "desc" },
+): string {
   const field = SORTABLE[sort?.field ?? "name"] ?? "name";
   const dir = sort?.dir === "desc" ? "desc" : "asc";
   return [
@@ -56,8 +61,17 @@ export function resourcesQuery(filters: ResourceFilters | undefined, sort?: { fi
   ].join("\n");
 }
 
-export function countByQuery(column: "type" | "location" | "subscriptionId" | "resourceGroup", filters?: ResourceFilters): string {
-  return ["Resources", ...whereClauses(filters), `| summarize count = count() by key = ${column}`, "| order by ['count'] desc", "| take 1000"].join("\n");
+export function countByQuery(
+  column: "type" | "location" | "subscriptionId" | "resourceGroup",
+  filters?: ResourceFilters,
+): string {
+  return [
+    "Resources",
+    ...whereClauses(filters),
+    `| summarize count = count() by key = ${column}`,
+    "| order by ['count'] desc",
+    "| take 1000",
+  ].join("\n");
 }
 
 export function resourceGroupsQuery(): string {

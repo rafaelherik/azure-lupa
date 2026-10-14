@@ -44,7 +44,12 @@ async function armListAll<T>(tenantId: string | undefined, path: string): Promis
 export class Inventory {
   constructor(private cache: Cache) {}
 
-  private graph<T>(tenantId: string, subscriptions: string[], query: string, opts: { top?: number; skipToken?: string } = {}) {
+  private graph<T>(
+    tenantId: string,
+    subscriptions: string[],
+    query: string,
+    opts: { top?: number; skipToken?: string } = {},
+  ) {
     if (subscriptions.length === 0) throw new AzureError("Select at least one subscription", 400, "NoScope");
     return armFetch<GraphResponse<T>>({
       tenantId,
@@ -103,11 +108,13 @@ export class Inventory {
           tenantId,
           "/subscriptions?api-version=2022-12-01",
         );
-        return raw
-          // the token for a tenant can still list subscriptions homed elsewhere (e.g. Lighthouse)
-          .filter((s) => !s.tenantId || s.tenantId === tenantId)
-          .map((s) => ({ subscriptionId: s.subscriptionId, tenantId, displayName: s.displayName, state: s.state }))
-          .sort((a, b) => a.displayName.localeCompare(b.displayName));
+        return (
+          raw
+            // the token for a tenant can still list subscriptions homed elsewhere (e.g. Lighthouse)
+            .filter((s) => !s.tenantId || s.tenantId === tenantId)
+            .map((s) => ({ subscriptionId: s.subscriptionId, tenantId, displayName: s.displayName, state: s.state }))
+            .sort((a, b) => a.displayName.localeCompare(b.displayName))
+        );
       },
       { freshAfter, ttlMs: 60 * 60_000 },
     );
@@ -119,7 +126,11 @@ export class Inventory {
       async () => {
         const [groups, counts] = await Promise.all([
           this.graphCollect<ResourceGroup>(tenantId, [subscriptionId], resourceGroupsQuery()),
-          this.graphCollect<{ resourceGroup: string; count: number }>(tenantId, [subscriptionId], resourceGroupCountsQuery()),
+          this.graphCollect<{ resourceGroup: string; count: number }>(
+            tenantId,
+            [subscriptionId],
+            resourceGroupCountsQuery(),
+          ),
         ]);
         const byName = new Map(counts.map((c) => [c.resourceGroup, c.count]));
         return groups.map((g) => ({ ...g, resourceCount: byName.get(g.name.toLowerCase()) ?? 0 }));
@@ -165,7 +176,12 @@ export class Inventory {
     );
   }
 
-  private async apiVersionFor(tenantId: string, subscriptionId: string, namespace: string, resourceType: string): Promise<string> {
+  private async apiVersionFor(
+    tenantId: string,
+    subscriptionId: string,
+    namespace: string,
+    resourceType: string,
+  ): Promise<string> {
     const provider = await this.cache.wrap(
       Cache.key("provider", [tenantId, subscriptionId, namespace.toLowerCase()]),
       () =>
@@ -187,7 +203,12 @@ export class Inventory {
       Cache.key("detail", [tenantId, resourceId.toLowerCase()]),
       async () => {
         const parsed = parseResourceId(resourceId);
-        const apiVersion = await this.apiVersionFor(tenantId, parsed.subscriptionId, parsed.namespace, parsed.resourceType);
+        const apiVersion = await this.apiVersionFor(
+          tenantId,
+          parsed.subscriptionId,
+          parsed.namespace,
+          parsed.resourceType,
+        );
         const resource = await armFetch<Record<string, unknown>>({
           tenantId,
           path: `${encodeURI(resourceId)}?api-version=${apiVersion}`,
@@ -205,7 +226,8 @@ export function parseResourceId(id: string): { subscriptionId: string; namespace
   const lower = parts.map((p) => p.toLowerCase());
   const subscriptionId = parts[lower.indexOf("subscriptions") + 1];
   const p = lower.lastIndexOf("providers");
-  if (!subscriptionId || p === -1 || !parts[p + 1]) throw new AzureError(`Unsupported resource id: ${id}`, 400, "BadResourceId");
+  if (!subscriptionId || p === -1 || !parts[p + 1])
+    throw new AzureError(`Unsupported resource id: ${id}`, 400, "BadResourceId");
   const namespace = parts[p + 1]!;
   const rest = parts.slice(p + 2);
   const types = rest.filter((_, i) => i % 2 === 0);

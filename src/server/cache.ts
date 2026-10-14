@@ -94,7 +94,11 @@ export class Cache {
    * `freshAfter` (epoch ms) rejects entries cached before it, which is how a user-triggered refresh
    * invalidates every view of a scope without enumerating cache keys.
    */
-  async wrap<T>(key: string, load: () => Promise<T>, opts: { freshAfter?: number; ttlMs?: number } = {}): Promise<Cached<T>> {
+  async wrap<T>(
+    key: string,
+    load: () => Promise<T>,
+    opts: { freshAfter?: number; ttlMs?: number } = {},
+  ): Promise<Cached<T>> {
     const hit = await this.get<T>(key);
     if (hit && hit.cachedAt >= (opts.freshAfter ?? 0)) {
       log.debug(`cache hit ${key}`);

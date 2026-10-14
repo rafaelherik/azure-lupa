@@ -35,17 +35,22 @@ export async function buildApp({ cache, token, webRoot = defaultWebRoot() }: App
     if (!LOCAL_HOSTS.has(host)) return reply.code(403).send({ error: "Forbidden host" });
     if (!req.url.startsWith("/api/")) return;
     const supplied = req.headers["x-lupa-token"] ?? (req.query as Record<string, string>).token;
-    if (supplied !== token) return reply.code(401).send({ error: "Invalid session token. Reopen the URL printed by azure-lupa." });
+    if (supplied !== token)
+      return reply.code(401).send({ error: "Invalid session token. Reopen the URL printed by azure-lupa." });
   });
 
   app.setErrorHandler((err: FastifyError | AzureError, _req, reply) => {
     if (err instanceof AzureError) {
-      return reply.code(err.status >= 400 && err.status < 600 ? err.status : 502).send({ error: err.message, code: err.code, hint: err.hint });
+      return reply
+        .code(err.status >= 400 && err.status < 600 ? err.status : 502)
+        .send({ error: err.message, code: err.code, hint: err.hint });
     }
     return reply.code(err.statusCode ?? 500).send({ error: err.message });
   });
 
-  app.get<{ Querystring: { freshAfter?: string } }>("/api/tenants", (req) => inventory.tenants(freshAfter(req.query.freshAfter)));
+  app.get<{ Querystring: { freshAfter?: string } }>("/api/tenants", (req) =>
+    inventory.tenants(freshAfter(req.query.freshAfter)),
+  );
 
   app.get<{ Params: { tid: string }; Querystring: { freshAfter?: string } }>("/api/tenants/:tid/subscriptions", (req) =>
     inventory.subscriptions(req.params.tid, freshAfter(req.query.freshAfter)),
@@ -72,7 +77,11 @@ export async function buildApp({ cache, token, webRoot = defaultWebRoot() }: App
     reply
       .header("content-type", format === "json" ? "application/json" : "text/csv; charset=utf-8")
       .header("content-disposition", `attachment; filename="azure-inventory-${stamp}.${format}"`);
-    return reply.send(Readable.from(format === "json" ? exportJson(inventory.exportRows(query)) : exportCsv(inventory.exportRows(query))));
+    return reply.send(
+      Readable.from(
+        format === "json" ? exportJson(inventory.exportRows(query)) : exportCsv(inventory.exportRows(query)),
+      ),
+    );
   });
 
   app.post("/api/cache/clear", async () => {

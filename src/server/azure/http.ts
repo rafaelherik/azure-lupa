@@ -50,7 +50,7 @@ function quotaResetSeconds(value: string | null): string | null {
   return String(h * 3600 + m * 60 + s);
 }
 
-const RETRYABLE =new Set([429, 500, 502, 503, 504]);
+const RETRYABLE = new Set([429, 500, 502, 503, 504]);
 
 export async function armFetch<T>(req: ArmRequest, fetchImpl: typeof fetch = fetch): Promise<T> {
   const key = `${req.tenantId ?? ""}|${req.method ?? "GET"}|${req.path}|${JSON.stringify(req.body ?? null)}`;
@@ -78,7 +78,8 @@ async function doFetch<T>(req: ArmRequest, fetchImpl: typeof fetch): Promise<T> 
     });
     log.debug(`${req.method ?? "GET"} ${url.replace(ARM, "")} → ${res.status} (${Date.now() - started}ms)`);
 
-    const remaining = res.headers.get("x-ms-user-quota-remaining") ?? res.headers.get("x-ms-ratelimit-remaining-tenant-reads");
+    const remaining =
+      res.headers.get("x-ms-user-quota-remaining") ?? res.headers.get("x-ms-ratelimit-remaining-tenant-reads");
     if (remaining && Number(remaining) < 5) {
       log.debug(`quota nearly exhausted (${remaining} left), slowing down`);
       await sleep(retryDelayMs(1, quotaResetSeconds(res.headers.get("x-ms-user-quota-resets-after"))));
