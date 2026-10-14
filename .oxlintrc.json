@@ -1,0 +1,31 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import"],
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "builtin": true,
+    "es2024": true
+  },
+  "ignorePatterns": ["dist/**", ".github/skills/**"],
+  "overrides": [
+    {
+      "files": ["src/server/**", "bin/**", "test/**", "*.config.ts"],
+      "env": { "node": true }
+    },
+    {
+      "files": ["src/web/**"],
+      "plugins": ["typescript", "unicorn", "oxc", "import", "react"],
+      "env": { "browser": true },
+      "rules": {
+        "react/rules-of-hooks": "error",
+        "react/exhaustive-deps": "warn"
+      }
+    },
+    {
+      "files": ["test/**"],
+      "plugins": ["typescript", "unicorn", "oxc", "import", "vitest"]
+    }
+  ]
+}

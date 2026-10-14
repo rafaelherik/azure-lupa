@@ -1,7 +1,7 @@
 {
   "name": "azure-lupa",
   "version": "0.1.0",
-  "description": "Local Azure inventory explorer using your Azure CLI login",
+  "description": "Open-source, local and read-only explorer for navigating your Azure resource inventory",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rafaelherik/azure-lupa.git"
@@ -19,7 +19,7 @@
     "dist"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "license": "MIT",
   "scripts": {
@@ -27,10 +27,14 @@
     "build": "tsc -p tsconfig.json --noEmit && vite build && tsup",
     "start": "node bin/azure-lupa.js",
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "oxlint --deny-warnings",
+    "lint:fix": "oxlint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@azure/identity": "^4.13.3",
+    "@azure/identity": "^4.14.0",
     "@fastify/static": "^10.1.6",
     "commander": "^15.0.0",
     "fastify": "^5.12.7",
@@ -38,17 +42,20 @@
     "p-limit": "^7.3.3"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query": "^5.104.2",
-    "@tanstack/react-table": "^8.21.3",
-    "@tanstack/react-virtual": "^3.14.18",
-    "@types/node": "^26.6.5",
+    "@tanstack/react-virtual": "^3.14.19",
+    "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "clsx": "^2.1.1",
     "concurrently": "^10.0.6",
     "lucide-react": "^1.56.0",
+    "oxlint": "^1.88.0",
+    "prettier": "^3.9.10",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "tailwindcss": "^4.3.3",

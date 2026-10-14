@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 tasks:
   default:
@@ -56,6 +56,20 @@ tasks:
     deps: [install]
     cmds:
       - npm run typecheck
+
+  lint:
+    desc: Lint with oxlint and check formatting with Prettier
+    deps: [install]
+    cmds:
+      - npm run lint
+      - npm run format:check
+
+  format:
+    desc: Format all files with Prettier and apply safe lint fixes
+    deps: [install]
+    cmds:
+      - npm run format
+      - npm run lint:fix
 
   start:
     desc: Build and run the CLI (pass options after --, e.g. task start -- --no-open)

@@ -1,0 +1,9 @@
+dist
+node_modules
+package-lock.json
+.github/skills
+.task
+assets
+.github/agents
+DESIGN.md
+PRODUCT.md

@@ -1,17 +1,17 @@
-name-template: 'v$RESOLVED_VERSION'
-tag-template: 'v$RESOLVED_VERSION'
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
 
 categories:
-  - title: '🚀 Features'
+  - title: "🚀 Features"
     labels: [feature, enhancement]
-  - title: '🐛 Fixes'
+  - title: "🐛 Fixes"
     labels: [fix, bug]
-  - title: '🧰 Maintenance'
+  - title: "🧰 Maintenance"
     labels: [chore, ci, docs, dependencies]
 
 exclude-labels: [skip-changelog]
 
-change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
+change-template: "- $TITLE (#$NUMBER) @$AUTHOR"
 change-title-escapes: '\<*_&'
 
 version-resolver:
@@ -28,27 +28,27 @@ autolabeler:
     title:
       - '/^\w+(\(.+\))?!:/'
     body:
-      - '/BREAKING CHANGE/'
+      - "/BREAKING CHANGE/"
   - label: feature
     branch:
       - '/^feat(ure)?\/.+/'
     title:
-      - '/^feat/i'
+      - "/^feat/i"
   - label: fix
     branch:
       - '/^(fix|bugfix|hotfix)\/.+/'
     title:
-      - '/^fix/i'
+      - "/^fix/i"
   - label: chore
     branch:
       - '/^(chore|ci|build|refactor)\/.+/'
     title:
-      - '/^(chore|ci|build|refactor)/i'
+      - "/^(chore|ci|build|refactor)/i"
   - label: docs
     branch:
       - '/^docs?\/.+/'
     title:
-      - '/^docs/i'
+      - "/^docs/i"
 
 template: |
   ## Changes
