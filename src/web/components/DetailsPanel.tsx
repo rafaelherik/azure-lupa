@@ -15,11 +15,15 @@ import {
   type Relation,
   type RelatedResource,
 } from "../lib/queries";
-import { useViewState } from "../lib/state";
+import { serialize, useViewState } from "../lib/state";
 import { copy } from "../lib/toast";
 import { Button, IconButton, Skeleton } from "./ui";
 
-type Tab = "overview" | "properties" | "json";
+import { VaultDetails } from "./VaultDetails";
+
+const STANDARD_TABS = ["overview", "properties", "json"] as const;
+const VAULT_TABS = ["secrets", "audit", ...STANDARD_TABS] as const;
+type Tab = (typeof VAULT_TABS)[number];
 
 const str = (v: unknown) => (typeof v === "string" && v ? v : undefined);
 const obj = (v: unknown) =>
@@ -49,8 +53,10 @@ export function DetailsPanel({
   subscriptionNames: Map<string, string>;
 }) {
   const [state, update] = useViewState();
-  const [tab, setTab] = useState<Tab>("overview");
-  const details = useDetails(tenantId, id);
+  const isVault = typeFromId(id).toLowerCase() === "microsoft.keyvault/vaults";
+  const [tab, setTab] = useState<Tab>(isVault ? "secrets" : "overview");
+  const vaultTab = tab === "secrets" || tab === "audit";
+  const details = useDetails(tenantId, vaultTab ? undefined : id);
   const scope = useMemo(
     () => ({ tenantId: state.tenantId, subscriptionIds: state.subscriptionIds }),
     [state.tenantId, state.subscriptionIds],
@@ -115,20 +121,19 @@ export function DetailsPanel({
             Open in Azure Portal
           </a>
         </div>
-        <div role="tablist" className="mt-3 flex gap-4">
-          {(["overview", "properties", "json"] as const).map((t) => (
+        <div aria-label="Resource views" className="mt-3 flex flex-wrap gap-x-4">
+          {(isVault ? VAULT_TABS : STANDARD_TABS).map((t) => (
             <button
               key={t}
-              role="tab"
               type="button"
-              aria-selected={tab === t}
+              aria-pressed={tab === t}
               onClick={() => setTab(t)}
               className={clsx(
                 "-mb-px h-9 border-b-2 text-[13px] font-medium capitalize transition-colors duration-150",
                 tab === t ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink",
               )}
             >
-              {t === "json" ? "JSON" : t}
+              {t === "json" ? "JSON" : t === "audit" ? "Audit Logs" : t}
             </button>
           ))}
         </div>
@@ -136,7 +141,21 @@ export function DetailsPanel({
 
       <ResourceLinks.Provider value={links}>
         <div className="min-h-0 flex-1 overflow-y-auto">
-          {details.isPending && (
+          {tab === "audit" && (
+            <a
+              href={serialize({ ...state, vaultAudit: true })}
+              onClick={(event) => {
+                if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                event.preventDefault();
+                update({ vaultAudit: true });
+              }}
+              className="mx-5 mt-3 inline-block text-[13px] font-medium text-accent hover:underline"
+            >
+              Open audit log page
+            </a>
+          )}
+          {vaultTab && <VaultDetails tenantId={tenantId} id={id} tab={tab} />}
+          {!vaultTab && details.isPending && (
             <div className="space-y-4 p-5">
               {[0, 1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="grid grid-cols-[120px_1fr] gap-3">
@@ -146,7 +165,7 @@ export function DetailsPanel({
               ))}
             </div>
           )}
-          {details.error && <DetailsError error={details.error} onRetry={() => void details.refetch()} />}
+          {!vaultTab && details.error && <DetailsError error={details.error} onRetry={() => void details.refetch()} />}
           {tab === "overview" && <OrphanCallout schema={schema} id={id} />}
           {r && tab === "overview" && (
             <Overview
@@ -173,7 +192,7 @@ export function DetailsPanel({
         </div>
       </ResourceLinks.Provider>
 
-      {details.data && (
+      {!vaultTab && details.data && (
         <footer className="flex h-10 shrink-0 items-center gap-2 border-t border-line bg-panel px-5 text-[12px] text-muted">
           <span>
             {details.data.fromCache ? "Cached" : "Fetched"} {timeAgo(details.data.cachedAt)} · API{" "}

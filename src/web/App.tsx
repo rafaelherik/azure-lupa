@@ -1,13 +1,15 @@
 import clsx from "clsx";
 import { Monitor, Moon, PanelLeft, RefreshCw, Sun } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { AuditControls } from "./components/AuditFilters";
 import { Dashboard } from "./components/Dashboard";
 import { DetailsPanel } from "./components/DetailsPanel";
 import { ResourceTable, TableError } from "./components/ResourceTable";
 import { Sidebar } from "./components/Sidebar";
+import { VaultDetails } from "./components/VaultDetails";
 import { Toolbar } from "./components/Toolbar";
 import { IconButton } from "./components/ui";
-import { timeAgo } from "./lib/format";
+import { portalUrl, timeAgo } from "./lib/format";
 import { refreshTenant, useSnapshot, useSubscriptions, useTenants } from "./lib/queries";
 import { useViewState } from "./lib/state";
 import { useTheme, type ThemeChoice } from "./lib/theme";
@@ -57,6 +59,7 @@ export function App() {
 
   const ThemeIcon = THEME_ICON[theme];
   const cached = snapshot.data;
+  const auditId = state.vaultAudit ? state.selectedId : undefined;
 
   return (
     <div className="flex h-full">
@@ -83,7 +86,7 @@ export function App() {
                   role="tab"
                   type="button"
                   aria-selected={state.view === v}
-                  onClick={() => update({ view: v })}
+                  onClick={() => update({ view: v, vaultAudit: undefined })}
                   className={clsx(
                     "-mb-px h-full border-b-2 text-[13px] font-medium capitalize transition-colors duration-150",
                     state.view === v ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink",
@@ -128,7 +131,44 @@ export function App() {
           </IconButton>
         </div>
 
-        {hasScope ? (
+        {hasScope && auditId && state.tenantId ? (
+          <section aria-labelledby="vault-audit-title" className="min-h-0 flex-1 overflow-auto">
+            <header className="border-b border-line px-5 py-4">
+              <button
+                type="button"
+                onClick={() => update({ vaultAudit: undefined })}
+                className="text-[13px] text-accent hover:underline"
+              >
+                Back to vault
+              </button>
+              <h1 id="vault-audit-title" className="mt-2 text-lg font-semibold">
+                Key Vault audit logs
+              </h1>
+              <a
+                href={portalUrl(auditId, state.tenantId)}
+                target="_blank"
+                rel="noreferrer"
+                className="break-all text-[13px] text-accent hover:underline"
+              >
+                {auditId.split("/").at(-1)} in Azure Portal
+              </a>
+              <AuditControls
+                key={auditId}
+                tenantId={state.tenantId}
+                id={auditId}
+                schema={snapshot.isPlaceholderData ? undefined : cached?.schema}
+                subscriptions={subscriptionNames}
+              />
+            </header>
+            <VaultDetails
+              key={`${state.tenantId}:${auditId}`}
+              tenantId={state.tenantId}
+              id={auditId}
+              tab="audit"
+              fullPage
+            />
+          </section>
+        ) : hasScope ? (
           <>
             <Toolbar scope={scope} sort={state.sort} />
             <div className="relative flex min-h-0 flex-1">
@@ -142,7 +182,7 @@ export function App() {
               {state.selectedId && state.tenantId && (
                 <div className="absolute inset-0 z-10 flex lg:static lg:z-auto">
                   <DetailsPanel
-                    key={state.selectedId}
+                    key={`${state.tenantId}:${state.selectedId}`}
                     tenantId={state.tenantId}
                     id={state.selectedId}
                     subscriptionNames={subscriptionNames}

@@ -27,6 +27,7 @@ export interface ArmRequest {
   method?: "GET" | "POST";
   path: string;
   body?: unknown;
+  scope?: string;
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -53,7 +54,7 @@ function quotaResetSeconds(value: string | null): string | null {
 const RETRYABLE = new Set([429, 500, 502, 503, 504]);
 
 export async function armFetch<T>(req: ArmRequest, fetchImpl: typeof fetch = fetch): Promise<T> {
-  const key = `${req.tenantId ?? ""}|${req.method ?? "GET"}|${req.path}|${JSON.stringify(req.body ?? null)}`;
+  const key = `${req.tenantId ?? ""}|${req.scope ?? ""}|${req.method ?? "GET"}|${req.path}|${JSON.stringify(req.body ?? null)}`;
   const existing = inflight.get(key);
   if (existing) return existing as Promise<T>;
 
@@ -65,9 +66,10 @@ export async function armFetch<T>(req: ArmRequest, fetchImpl: typeof fetch = fet
 async function doFetch<T>(req: ArmRequest, fetchImpl: typeof fetch): Promise<T> {
   const url = req.path.startsWith("http") ? req.path : ARM + req.path;
   for (let attempt = 0; ; attempt++) {
-    const token = await getToken(req.tenantId);
+    const token = await getToken(req.tenantId, req.scope);
     const started = Date.now();
     const res = await fetchImpl(url, {
+      redirect: req.scope ? "error" : "follow",
       method: req.method ?? "GET",
       headers: {
         authorization: `Bearer ${token}`,
@@ -76,7 +78,9 @@ async function doFetch<T>(req: ArmRequest, fetchImpl: typeof fetch): Promise<T> 
       },
       body: req.body === undefined ? undefined : JSON.stringify(req.body),
     });
-    log.debug(`${req.method ?? "GET"} ${url.replace(ARM, "")} → ${res.status} (${Date.now() - started}ms)`);
+    log.debug(
+      `${req.method ?? "GET"} ${req.scope ? new URL(url).origin : url.replace(ARM, "")} → ${res.status} (${Date.now() - started}ms)`,
+    );
 
     const remaining =
       res.headers.get("x-ms-user-quota-remaining") ?? res.headers.get("x-ms-ratelimit-remaining-tenant-reads");

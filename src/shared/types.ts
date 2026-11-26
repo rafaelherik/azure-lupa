@@ -103,3 +103,45 @@ export interface ApiError {
   code?: string;
   hint?: string;
 }
+
+export interface VaultSecret {
+  name: string;
+  updated?: string;
+}
+
+export interface VaultSecretVersion {
+  version: string;
+  created?: string;
+  updated?: string;
+}
+
+export const vaultRanges = ["1h", "6h", "24h", "7d", "30d", "custom"] as const;
+export type VaultLogRange = (typeof vaultRanges)[number];
+export interface AuditFilters {
+  range: VaultLogRange;
+  from?: string;
+  to?: string;
+  actions?: string[];
+}
+
+export function validAuditDates(from?: string, to?: string): boolean {
+  const valid = (date?: string) => {
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+    const time = Date.parse(date + "T00:00:00Z");
+    return Number.isFinite(time) && new Date(time).toISOString().startsWith(date);
+  };
+  return valid(from) && valid(to) && from! <= to!;
+}
+
+export interface VaultAudit {
+  events: Array<{
+    time: string;
+    operation: string;
+    result: string;
+    principal?: string;
+    principalName?: string;
+    principalType?: "upn" | "objectId" | "appId";
+  }>;
+  capped: boolean;
+  partial: boolean;
+}

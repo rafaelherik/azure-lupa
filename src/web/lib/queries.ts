@@ -296,3 +296,16 @@ export function useDetails(tenantId: string | undefined, id: string | undefined)
     ...session,
   });
 }
+
+export function useVaultChoices(schema?: string) {
+  return useQuery({
+    queryKey: ["vaultChoices", schema],
+    enabled: Boolean(schema),
+    ...session,
+    queryFn: async () =>
+      (await duckdb()).query<{ id: string; name: string; subscriptionId: string }>(
+        `SELECT id, name, subscription_id AS subscriptionId FROM ${schema}.resources
+       WHERE type_lc = 'microsoft.keyvault/vaults' ORDER BY lower(name), id`,
+      ),
+  });
+}

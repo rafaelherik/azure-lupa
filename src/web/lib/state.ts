@@ -1,5 +1,11 @@
 import { useCallback, useSyncExternalStore } from "react";
-import type { ResourceFilters, SortField } from "../../shared/types";
+import {
+  vaultRanges,
+  validAuditDates,
+  type AuditFilters,
+  type ResourceFilters,
+  type SortField,
+} from "../../shared/types";
 
 /** Everything that defines the current view lives in the URL, so views are linkable and Back works. */
 export interface ViewState {
@@ -9,6 +15,8 @@ export interface ViewState {
   filters: ResourceFilters;
   sort: { field: SortField; dir: "asc" | "desc" };
   selectedId?: string;
+  vaultAudit?: boolean;
+  auditFilters?: AuditFilters;
 }
 
 const list = (v: string | null) => (v ? v.split(",").filter(Boolean) : []);
@@ -16,7 +24,13 @@ const list = (v: string | null) => (v ? v.split(",").filter(Boolean) : []);
 export function parse(search: string): ViewState {
   const p = new URLSearchParams(search);
   const [field, dir] = (p.get("sort") ?? "name:asc").split(":");
+  const range = vaultRanges.find((r) => r === p.get("range")) ?? "24h";
+  const from = p.get("from") ?? undefined;
+  const to = p.get("to") ?? undefined;
+  const period =
+    range === "custom" ? (validAuditDates(from, to) ? { range, from, to } : { range: "24h" as const }) : { range };
   return {
+    ...(p.get("audit") === "1" ? { auditFilters: { ...period, actions: p.getAll("action") } } : {}),
     tenantId: p.get("tenant") ?? undefined,
     subscriptionIds: list(p.get("subs")),
     view: p.get("view") === "dashboard" ? "dashboard" : "resources",
@@ -30,6 +44,7 @@ export function parse(search: string): ViewState {
     },
     sort: { field: (field as SortField) || "name", dir: dir === "desc" ? "desc" : "asc" },
     selectedId: p.get("id") ?? undefined,
+    vaultAudit: p.get("audit") === "1" || undefined,
   };
 }
 
@@ -50,6 +65,16 @@ export function serialize(s: ViewState): string {
   if (s.filters.orphansOnly) set("orphans", "1");
   if (s.sort.field !== "name" || s.sort.dir !== "asc") set("sort", `${s.sort.field}:${s.sort.dir}`);
   set("id", s.selectedId);
+  if (s.selectedId && s.vaultAudit) {
+    set("audit", "1");
+    const f = s.auditFilters;
+    if (f && f.range !== "24h") set("range", f.range);
+    if (f?.range === "custom") {
+      set("from", f.from);
+      set("to", f.to);
+    }
+    for (const action of f?.actions ?? []) p.append("action", action);
+  }
   const str = p.toString().replace(/%2C/g, ",");
   return str ? `?${str}` : "";
 }
