@@ -1,4 +1,6 @@
 import type {
+  ActivityQuery,
+  ActivityResult,
   ApiError,
   Cached,
   ResourceDetails,
@@ -71,6 +73,11 @@ export const api = {
       `/api/tenants/${tenantId}/subscriptions/${subscriptionId}/resource-groups${q(freshAfter)}`,
     ),
   snapshot: (query: SnapshotQuery) => request<Cached<Snapshot>>("/api/snapshot", post(query)),
+  activity: ({ tenantId, id, range }: ActivityQuery, signal: AbortSignal) =>
+    request<ActivityResult>(`/api/logs/activity?${new URLSearchParams({ tenantId, id, range })}`, {
+      signal,
+      cache: "no-store",
+    }),
   details: (tenantId: string, id: string, freshAfter?: number) =>
     request<Cached<ResourceDetails>>(
       `/api/resources/details?${new URLSearchParams({ tenantId, id, ...(freshAfter ? { freshAfter: String(freshAfter) } : {}) })}`,

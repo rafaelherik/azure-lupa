@@ -104,6 +104,40 @@ export interface ApiError {
   hint?: string;
 }
 
+export const activityRanges = ["1h", "24h", "7d"] as const;
+export type ActivityRange = (typeof activityRanges)[number];
+
+export interface ActivityQuery {
+  tenantId: string;
+  id: string;
+  range: ActivityRange;
+}
+
+export interface ActivityEvent {
+  time: string;
+  operation: string;
+  status: string;
+  caller: string;
+}
+
+export interface ActivityResult {
+  resourceId: string;
+  from: string;
+  to: string;
+  events: ActivityEvent[];
+  incomplete:
+    | null
+    | "event-limit"
+    | "page-limit"
+    | "invalid-continuation"
+    | "timeout"
+    | "upstream-error"
+    | "invalid-event"
+    | "sign-in"
+    | "access-denied"
+    | "throttled";
+}
+
 export interface VaultSecret {
   name: string;
   updated?: string;

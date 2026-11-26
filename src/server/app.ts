@@ -3,7 +3,14 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Fastify, { type FastifyError } from "fastify";
 import fastifyStatic from "@fastify/static";
-import { vaultRanges, type SnapshotQuery, type VaultLogRange } from "../shared/types.js";
+import {
+  activityRanges,
+  vaultRanges,
+  type ActivityQuery,
+  type SnapshotQuery,
+  type VaultLogRange,
+} from "../shared/types.js";
+import { listActivity } from "./azure/activity.js";
 import { AzureError } from "./azure/http.js";
 import { Inventory } from "./azure/inventory.js";
 import { listVaultSecrets, listVaultVersions, vaultActions, vaultAudit } from "./azure/keyVault.js";
@@ -80,6 +87,42 @@ export async function buildApp({ cache, token, webRoot = defaultWebRoot() }: App
 
   app.get<{ Querystring: { tenantId: string; id: string; freshAfter?: string } }>("/api/resources/details", (req) =>
     inventory.details(req.query.tenantId, req.query.id, freshAfter(req.query.freshAfter)),
+  );
+
+  app.get<{ Querystring: ActivityQuery }>(
+    "/api/logs/activity",
+    {
+      onRequest: async (_req, reply) => {
+        reply.header("Cache-Control", "no-store");
+      },
+      schema: {
+        querystring: {
+          type: "object",
+          required: ["tenantId", "id", "range"],
+          properties: {
+            tenantId: { type: "string", maxLength: 36, pattern: GUID },
+            id: { type: "string", minLength: 1, maxLength: 2048 },
+            range: { type: "string", enum: activityRanges },
+          },
+        },
+      },
+    },
+    async ({ query }, reply) => {
+      const client = new AbortController();
+      const onClose = () => {
+        if (!reply.raw.writableFinished) client.abort();
+      };
+      reply.raw.once("close", onClose);
+      if (reply.raw.destroyed) onClose();
+      try {
+        return await listActivity(query, client.signal);
+      } catch (error) {
+        if (!client.signal.aborted) throw error;
+        reply.hijack();
+      } finally {
+        reply.raw.off("close", onClose);
+      }
+    },
   );
 
   const vaultQuery = {
