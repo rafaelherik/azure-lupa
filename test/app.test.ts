@@ -38,3 +38,30 @@ describe("POST /api/snapshot", () => {
     expect(res.statusCode).toBe(400);
   });
 });
+
+describe("Key Vault API validation", () => {
+  it.each([
+    ["secrets", "/subscriptions/example/providers/Microsoft.KeyVault/vaults/test-vault", {}],
+    [
+      "secret-versions",
+      "/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/test/providers/Microsoft.KeyVault/vaults/test-vault",
+      { name: "x/versions" },
+    ],
+    [
+      "audit-logs",
+      "/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/test/providers/Microsoft.KeyVault/vaults/test-vault",
+      { range: "invalid" },
+    ],
+  ])("rejects invalid input for %s", async (path, id, extra) => {
+    const query = new URLSearchParams({ tenantId: "00000000-0000-0000-0000-000000000001", id, ...extra } as Record<
+      string,
+      string
+    >);
+    const response = await app.inject({
+      method: "GET",
+      url: `/api/key-vault/${path}?${query}`,
+      headers: { host: "127.0.0.1", "x-lupa-token": "t" },
+    });
+    expect(response.statusCode).toBe(400);
+  });
+});

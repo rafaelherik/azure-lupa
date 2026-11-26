@@ -3,9 +3,10 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Fastify, { type FastifyError } from "fastify";
 import fastifyStatic from "@fastify/static";
-import type { SnapshotQuery } from "../shared/types.js";
+import { vaultRanges, type SnapshotQuery, type VaultLogRange } from "../shared/types.js";
 import { AzureError } from "./azure/http.js";
 import { Inventory } from "./azure/inventory.js";
+import { listVaultSecrets, listVaultVersions, vaultActions, vaultAudit } from "./azure/keyVault.js";
 import type { Cache } from "./cache.js";
 
 export interface AppOptions {
@@ -79,6 +80,68 @@ export async function buildApp({ cache, token, webRoot = defaultWebRoot() }: App
 
   app.get<{ Querystring: { tenantId: string; id: string; freshAfter?: string } }>("/api/resources/details", (req) =>
     inventory.details(req.query.tenantId, req.query.id, freshAfter(req.query.freshAfter)),
+  );
+
+  const vaultQuery = {
+    tenantId: { type: "string", pattern: GUID },
+    id: { type: "string", maxLength: 250 },
+  };
+  function vaultSchema(extra: Record<string, unknown> = {}, optional: Record<string, unknown> = {}) {
+    return {
+      querystring: {
+        type: "object",
+        required: ["tenantId", "id", ...Object.keys(extra)],
+        properties: { ...vaultQuery, ...extra, ...optional },
+      },
+    };
+  }
+  type VaultQuery = { tenantId: string; id: string };
+  app.get<{ Querystring: VaultQuery }>("/api/key-vault/secrets", { schema: vaultSchema() }, ({ query }, reply) => {
+    reply.header("Cache-Control", "no-store");
+    return listVaultSecrets(inventory, query.tenantId, query.id);
+  });
+  app.get<{ Querystring: VaultQuery & { name: string } }>(
+    "/api/key-vault/secret-versions",
+    { schema: vaultSchema({ name: { type: "string", pattern: "^[A-Za-z0-9-]{1,127}$" } }) },
+    ({ query }, reply) => {
+      reply.header("Cache-Control", "no-store");
+      return listVaultVersions(inventory, query.tenantId, query.id, query.name);
+    },
+  );
+  type AuditQuery = VaultQuery & {
+    range: VaultLogRange;
+    from?: string;
+    to?: string;
+    actions?: string[];
+    resolvePrincipals?: boolean;
+  };
+  const period = { range: { type: "string", enum: vaultRanges } };
+  const dates = { from: { type: "string", format: "date" }, to: { type: "string", format: "date" } };
+  app.get<{ Querystring: AuditQuery }>(
+    "/api/key-vault/audit-actions",
+    { schema: vaultSchema(period, dates) },
+    ({ query }, reply) => {
+      reply.header("Cache-Control", "no-store");
+      return vaultActions(query.tenantId, query.id, query);
+    },
+  );
+  app.get<{ Querystring: AuditQuery }>(
+    "/api/key-vault/audit-logs",
+    {
+      schema: vaultSchema(period, {
+        ...dates,
+        resolvePrincipals: { type: "boolean" },
+        actions: { type: "array", items: { type: "string", minLength: 1, maxLength: 256 } },
+      }),
+    },
+    ({ query }, reply) => {
+      reply.header("Cache-Control", "no-store");
+      return vaultAudit(query.tenantId, query.id, query.range, query.resolvePrincipals, {
+        from: query.from,
+        to: query.to,
+        actions: query.actions,
+      });
+    },
   );
 
   app.post("/api/cache/clear", async () => {

@@ -7,6 +7,10 @@ import type {
   SnapshotQuery,
   Subscription,
   Tenant,
+  VaultAudit,
+  AuditFilters,
+  VaultSecret,
+  VaultSecretVersion,
 } from "../../shared/types";
 
 const TOKEN_KEY = "lupa-token";
@@ -72,3 +76,34 @@ export const api = {
       `/api/resources/details?${new URLSearchParams({ tenantId, id, ...(freshAfter ? { freshAfter: String(freshAfter) } : {}) })}`,
     ),
 };
+
+export function requestVault<T>(path: string, params: Record<string, string>, signal: AbortSignal) {
+  return request<T>(`/api/key-vault/${path}?${new URLSearchParams(params)}`, { signal });
+}
+
+export const vaultApi = {
+  secrets: (tenantId: string, id: string, signal: AbortSignal) =>
+    requestVault<VaultSecret[]>("secrets", { tenantId, id }, signal),
+  versions: (tenantId: string, id: string, name: string, signal: AbortSignal) =>
+    requestVault<VaultSecretVersion[]>("secret-versions", { tenantId, id, name }, signal),
+  audit: (tenantId: string, id: string, filters: AuditFilters, signal: AbortSignal, resolvePrincipals = false) => {
+    const params = auditParams(tenantId, id, filters);
+    for (const action of filters.actions ?? []) params.append("actions", action);
+    if (resolvePrincipals) params.set("resolvePrincipals", "true");
+    return request<VaultAudit>(`/api/key-vault/audit-logs?${params}`, { signal });
+  },
+  actions: (tenantId: string, id: string, period: AuditFilters, signal: AbortSignal) =>
+    request<{ actions: string[]; partial: boolean }>(
+      `/api/key-vault/audit-actions?${auditParams(tenantId, id, period)}`,
+      { signal },
+    ),
+};
+
+function auditParams(tenantId: string, id: string, { range, from, to }: AuditFilters) {
+  const params = new URLSearchParams({ tenantId, id, range });
+  if (range === "custom" && from && to) {
+    params.set("from", from);
+    params.set("to", to);
+  }
+  return params;
+}

@@ -26,8 +26,8 @@ function credentialFor(tenantId?: string) {
  * Returns an ARM access token from the Azure CLI for the given tenant (home tenant when omitted).
  * Tokens are cached in memory until shortly before expiry, since each CLI call spawns `az`.
  */
-export async function getToken(tenantId?: string): Promise<string> {
-  const key = tenantId ?? "";
+export async function getToken(tenantId?: string, scope = SCOPE): Promise<string> {
+  const key = JSON.stringify([tenantId, scope]);
   const cached = tokens.get(key);
   if (cached) {
     try {
@@ -39,7 +39,7 @@ export async function getToken(tenantId?: string): Promise<string> {
   }
 
   const pending = credentialFor(tenantId)
-    .getToken(SCOPE)
+    .getToken(scope)
     .then((t) => ({ token: t.token, expiresOn: t.expiresOnTimestamp }))
     .catch((err: unknown) => {
       tokens.delete(key);
