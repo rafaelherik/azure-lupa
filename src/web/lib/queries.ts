@@ -309,3 +309,24 @@ export function useVaultChoices(schema?: string) {
       ),
   });
 }
+
+export interface ActivityTarget {
+  id: string;
+  name: string;
+  type: string;
+  resourceGroup: string;
+  subscriptionId: string;
+}
+
+export function useActivityTargets(schema?: string) {
+  return useQuery({
+    queryKey: ["activityTargets", schema],
+    enabled: Boolean(schema),
+    ...session,
+    queryFn: async () =>
+      (await duckdb()).query<ActivityTarget>(
+        `SELECT id, name, type, resource_group AS resourceGroup, subscription_id AS subscriptionId
+         FROM ${schema}.resources ORDER BY lower(name), id`,
+      ),
+  });
+}

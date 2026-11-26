@@ -44,6 +44,7 @@ npx azure-lupa    # starts a local server and opens your browser
 - Open a resource to see its **essentials, related resources** (parent, children, what it uses and what uses it), **tags, property tree and raw JSON**, copy its ID, or jump to the Azure Portal
 - **Orphan detection**: resources that look abandoned (unattached disks, unassociated public IPs, NICs and NSGs, empty App Service plans, VNet gateways without connections, empty resource groups and more) are flagged, filterable with **Orphans**, and summarized on the dashboard. The rules follow the [Azure Orphaned Resources workbook](https://github.com/dolevshor/azure-orphan-resources); treat them as hints and confirm before deleting anything
 - A **dashboard** of counts by type, location, subscription and resource group (select a bar to drill in)
+- **Log Viewer → Monitor** reads a selected resource’s **Azure Activity Log** for the last hour, 24 hours, or 7 days. It shows management events, not application or runtime logs. No Log Analytics workspace is required; your Azure CLI account must have permission to read the subscription’s Activity Log.
 - **Azure service icons** for common resource types
 - **Export** the current view to CSV or JSON
 - `⌘` / `Ctrl` + click a subscription to **combine several in one view**; `Esc` closes the details panel
@@ -62,7 +63,7 @@ Tenants that need their own sign-in (MFA or conditional access) show the exact c
 - Selecting subscriptions loads a **snapshot** of their resources from **Azure Resource Graph**. The server keeps only what the UI needs (list fields, the few properties orphan rules check, and the IDs each resource references) and the browser loads it into **DuckDB-Wasm**. Search, filters, sorting, the dashboard, orphan rules, related resources and export all run there as SQL, with no further Azure calls.
 - The DuckDB engine (about 36 MB) is downloaded from [jsDelivr](https://www.jsdelivr.com/package/npm/@duckdb/duckdb-wasm) the first time you select a subscription, pinned to the version azure-lupa was built with, and then cached by the browser. This needs internet access to `cdn.jsdelivr.net`; DuckDB never fetches extensions.
 - Resource details come from ARM, using the newest stable API version of the resource's provider.
-- Responses are cached in `~/.azure-lupa/cache` (15 minutes by default), so reopening the app is instant. **Refresh** fetches the current tenant again.
+- Inventory responses are cached in `~/.azure-lupa/cache` (15 minutes by default), so reopening the app is instant. **Refresh** fetches the current tenant again. Activity Log reads run on demand and are not cached.
 - Azure calls are limited to 4 concurrent requests and retry on throttling (`429`), honoring `Retry-After`.
 
 ## Options

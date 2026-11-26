@@ -1,9 +1,10 @@
 import clsx from "clsx";
 import { Monitor, Moon, PanelLeft, RefreshCw, Sun } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AuditControls } from "./components/AuditFilters";
 import { Dashboard } from "./components/Dashboard";
 import { DetailsPanel } from "./components/DetailsPanel";
+import { LogViewer } from "./components/LogViewer";
 import { ResourceTable, TableError } from "./components/ResourceTable";
 import { Sidebar } from "./components/Sidebar";
 import { VaultDetails } from "./components/VaultDetails";
@@ -11,12 +12,13 @@ import { Toolbar } from "./components/Toolbar";
 import { IconButton } from "./components/ui";
 import { portalUrl, timeAgo } from "./lib/format";
 import { refreshTenant, useSnapshot, useSubscriptions, useTenants } from "./lib/queries";
-import { useViewState } from "./lib/state";
+import { serialize, useViewState } from "./lib/state";
 import { useTheme, type ThemeChoice } from "./lib/theme";
 import { Toaster } from "./lib/toast";
 
 const THEME_NEXT: Record<ThemeChoice, ThemeChoice> = { system: "light", light: "dark", dark: "system" };
 const THEME_ICON = { system: Monitor, light: Sun, dark: Moon };
+const MAIN_VIEWS = { resources: "Resources", dashboard: "Dashboard", logs: "Log Viewer" } as const;
 
 function useNow(intervalMs = 30_000) {
   const [now, setNow] = useState(Date.now());
@@ -31,6 +33,9 @@ export function App() {
   const [state, update] = useViewState();
   const [theme, setTheme] = useTheme();
   const [navOpen, setNavOpen] = useState(false);
+  const sidebar = useRef<HTMLDivElement>(null);
+  const navTrigger = useRef<HTMLButtonElement>(null);
+  const wasNavOpen = useRef(false);
   const now = useNow();
   const scope = useMemo(
     () => ({ tenantId: state.tenantId, subscriptionIds: state.subscriptionIds }),
@@ -52,51 +57,85 @@ export function App() {
       : `${scope.subscriptionIds.length} subscriptions`;
 
   useEffect(() => {
-    document.title = hasScope ? `${scopeLabel} · azure-lupa` : "azure-lupa";
-  }, [hasScope, scopeLabel]);
+    const title = hasScope ? `${scopeLabel} · azure-lupa` : "azure-lupa";
+    document.title = state.view === "logs" ? `Log Viewer · ${title}` : title;
+  }, [hasScope, scopeLabel, state.view]);
 
   useEffect(() => setNavOpen(false), [state.subscriptionIds, state.filters.resourceGroups]);
+  useEffect(() => {
+    if (!navOpen) return;
+    const desktop = window.matchMedia("(min-width: 64rem)");
+    const dismiss = () => {
+      if (desktop.matches) setNavOpen(false);
+    };
+    dismiss();
+    desktop.addEventListener("change", dismiss);
+    return () => desktop.removeEventListener("change", dismiss);
+  }, [navOpen]);
+  useLayoutEffect(() => {
+    if (navOpen) sidebar.current?.querySelector("input")?.focus();
+    else if (wasNavOpen.current) navTrigger.current?.focus();
+    wasNavOpen.current = navOpen;
+  }, [navOpen]);
 
   const ThemeIcon = THEME_ICON[theme];
   const cached = snapshot.data;
-  const auditId = state.vaultAudit ? state.selectedId : undefined;
+  const activitySchema = snapshot.isPlaceholderData || snapshot.isError ? undefined : cached?.schema;
+  const auditId = state.view !== "logs" && state.vaultAudit ? state.selectedId : undefined;
 
   return (
     <div className="flex h-full">
       <div
+        id="scope-sidebar"
+        ref={sidebar}
+        onKeyDown={(event) => {
+          if (event.key === "Escape" && navOpen) {
+            event.stopPropagation();
+            setNavOpen(false);
+          }
+        }}
         className={clsx(
           "fixed inset-y-0 left-0 z-30 w-[288px] transition-transform duration-200 lg:static lg:w-[272px] lg:translate-x-0",
-          navOpen ? "translate-x-0 shadow-overlay" : "-translate-x-full",
+          navOpen ? "translate-x-0 shadow-overlay" : "invisible -translate-x-full lg:visible",
         )}
       >
         <Sidebar />
       </div>
       {navOpen && <div className="fixed inset-0 z-20 bg-ink/20 lg:hidden" onClick={() => setNavOpen(false)} />}
 
-      <main className="flex min-w-0 flex-1 flex-col">
-        <div className="flex h-14 shrink-0 items-center gap-3 border-b border-line px-4 md:px-6">
-          <IconButton label="Show tenants" className="lg:hidden" onClick={() => setNavOpen(true)}>
-            <PanelLeft className="size-4" />
-          </IconButton>
-          {hasScope && (
-            <div role="tablist" className="flex h-full gap-5">
-              {(["resources", "dashboard"] as const).map((v) => (
-                <button
-                  key={v}
-                  role="tab"
-                  type="button"
-                  aria-selected={state.view === v}
-                  onClick={() => update({ view: v, vaultAudit: undefined })}
-                  className={clsx(
-                    "-mb-px h-full border-b-2 text-[13px] font-medium capitalize transition-colors duration-150",
-                    state.view === v ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink",
-                  )}
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
-          )}
+      <main inert={navOpen} className="flex min-w-0 flex-1 flex-col">
+        <div className="flex h-14 shrink-0 items-center gap-1 border-b border-line px-2 sm:gap-3 sm:px-4 md:px-6">
+          <button
+            ref={navTrigger}
+            type="button"
+            aria-label="Show tenants"
+            aria-controls="scope-sidebar"
+            aria-expanded={navOpen}
+            className="inline-grid size-7 shrink-0 place-items-center rounded-md text-muted hover:bg-hover lg:hidden"
+            onClick={() => setNavOpen(true)}
+          >
+            <PanelLeft aria-hidden className="size-4" />
+          </button>
+          <nav aria-label="Main navigation" className="flex h-full gap-2 sm:gap-5">
+            {(Object.keys(MAIN_VIEWS) as (keyof typeof MAIN_VIEWS)[]).map((view) => (
+              <a
+                key={view}
+                href={location.pathname + serialize({ ...state, view, vaultAudit: undefined })}
+                aria-current={state.view === view && !auditId ? "page" : undefined}
+                onClick={(event) => {
+                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                  event.preventDefault();
+                  update({ view, vaultAudit: undefined });
+                }}
+                className={clsx(
+                  "flex h-full items-center border-b-2 text-[13px] font-medium whitespace-nowrap transition-colors",
+                  state.view === view ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink",
+                )}
+              >
+                {MAIN_VIEWS[view]}
+              </a>
+            ))}
+          </nav>
           {hasScope && (
             <p className="hidden min-w-0 truncate text-[12px] text-muted md:block">
               <span className="text-faint">/</span> {tenantName ?? "Tenant"} <span className="text-faint">/</span>{" "}
@@ -118,11 +157,12 @@ export function App() {
               <span className="hidden text-faint sm:inline">·</span>
               <button
                 type="button"
+                aria-label="Refresh inventory"
                 onClick={() => state.tenantId && refreshTenant(state.tenantId)}
                 className="inline-flex items-center gap-1 font-medium text-accent hover:underline"
               >
                 <RefreshCw className="size-3" />
-                Refresh
+                <span className="hidden sm:inline">Refresh</span>
               </button>
             </span>
           )}
@@ -131,7 +171,17 @@ export function App() {
           </IconButton>
         </div>
 
-        {hasScope && auditId && state.tenantId ? (
+        {state.view === "logs" ? (
+          <LogViewer
+            key={JSON.stringify([scope.tenantId, [...scope.subscriptionIds].sort(), activitySchema])}
+            tenantId={hasScope ? scope.tenantId : undefined}
+            schema={activitySchema}
+            discoveryFailed={snapshot.isError}
+            retryDiscovery={() => void snapshot.refetch()}
+            subscriptionNames={subs.isPlaceholderData ? undefined : subscriptionNames}
+            onOpenNav={() => setNavOpen(true)}
+          />
+        ) : hasScope && auditId && state.tenantId ? (
           <section aria-labelledby="vault-audit-title" className="min-h-0 flex-1 overflow-auto">
             <header className="border-b border-line px-5 py-4">
               <button

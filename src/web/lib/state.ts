@@ -11,7 +11,7 @@ import {
 export interface ViewState {
   tenantId?: string;
   subscriptionIds: string[];
-  view: "resources" | "dashboard";
+  view: "resources" | "dashboard" | "logs";
   filters: ResourceFilters;
   sort: { field: SortField; dir: "asc" | "desc" };
   selectedId?: string;
@@ -27,13 +27,14 @@ export function parse(search: string): ViewState {
   const range = vaultRanges.find((r) => r === p.get("range")) ?? "24h";
   const from = p.get("from") ?? undefined;
   const to = p.get("to") ?? undefined;
+  const view = p.get("view");
   const period =
     range === "custom" ? (validAuditDates(from, to) ? { range, from, to } : { range: "24h" as const }) : { range };
   return {
     ...(p.get("audit") === "1" ? { auditFilters: { ...period, actions: p.getAll("action") } } : {}),
     tenantId: p.get("tenant") ?? undefined,
     subscriptionIds: list(p.get("subs")),
-    view: p.get("view") === "dashboard" ? "dashboard" : "resources",
+    view: view === "dashboard" || view === "logs" ? view : "resources",
     filters: {
       search: p.get("q") ?? undefined,
       types: list(p.get("types")),
